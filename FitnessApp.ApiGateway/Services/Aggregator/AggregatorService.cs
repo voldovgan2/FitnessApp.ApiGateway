@@ -1,4 +1,5 @@
-﻿using FitnessApp.ApiGateway.Models.Contacts.Input;
+﻿using FitnessApp.ApiGateway.Models.Blob.Output;
+using FitnessApp.ApiGateway.Models.Contacts.Input;
 using FitnessApp.ApiGateway.Models.Exercises.Input;
 using FitnessApp.ApiGateway.Models.Exercises.Output;
 using FitnessApp.ApiGateway.Models.Food.Input;
@@ -7,6 +8,7 @@ using FitnessApp.ApiGateway.Models.Settings.Input;
 using FitnessApp.ApiGateway.Models.Settings.Output;
 using FitnessApp.ApiGateway.Models.UserProfile.Input;
 using FitnessApp.ApiGateway.Models.UserProfile.Output;
+using FitnessApp.ApiGateway.Services.Blob;
 using FitnessApp.ApiGateway.Services.Contacts;
 using FitnessApp.ApiGateway.Services.Exercises;
 using FitnessApp.ApiGateway.Services.Food;
@@ -14,7 +16,10 @@ using FitnessApp.ApiGateway.Services.Settings;
 using FitnessApp.ApiGateway.Services.UserProfile;
 using FitnessApp.Paged.Extensions;
 using FitnessApp.Paged.Models.Output;
+using System;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FitnessApp.ApiGateway.Services.Aggregator
@@ -26,6 +31,10 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
         private readonly IUserProfileService<UserProfileModel> _userProfileService;
         private readonly IFoodService<UserFoodsModel, FoodItemModel> _foodService;
         private readonly IExercisesService<UserExercisesModel, ExerciseItemModel> _exercisesService;
+        private readonly IBlobService _blobService;
+        private const string PROFILE_CONTAINER_NAME = "Profile";
+        private const string FOOD_CONTAINER_NAME = "Food";
+        private const string EXERCICES_CONTAINER_NAME = "Exercise";
 
         public AggregatorService
         (
@@ -33,7 +42,8 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
             ISettingsService<SettingsModel> settingsService,
             IUserProfileService<UserProfileModel> userProfileService,
             IFoodService<UserFoodsModel, FoodItemModel> foodService,
-            IExercisesService<UserExercisesModel, ExerciseItemModel> exercisesService
+            IExercisesService<UserExercisesModel, ExerciseItemModel> exercisesService,
+            IBlobService blobService
         )
         {
             _contactsService = contactsService;
@@ -41,6 +51,7 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
             _userProfileService = userProfileService;
             _foodService = foodService;
             _exercisesService = exercisesService;
+            _blobService = blobService;
         }
 
         #region Contacts
@@ -144,9 +155,21 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public async Task<UserProfileModel> GetUserProfileAsync(GetUserProfileModel model)
         {
-            UserProfileModel result =  await _userProfileService.GetItemAsync(model.ContactsUserId);
+            var result =  await _userProfileService.GetItemAsync(model.ContactsUserId);
             if (result != null)
             {
+                await FillBlobFields
+                (
+                    result,
+                    PROFILE_CONTAINER_NAME, 
+                    result.UserId, 
+                    new string[]
+                    {
+                        nameof(UserProfileModel.CroppedProfilePhoto),
+                        nameof(UserProfileModel.OriginalProfilePhoto),
+                        nameof(UserProfileModel.BackgroundPhoto),
+                    }
+                );
                 var userContactsCount = await _contactsService.GetUserContactsCountAsync(model.ContactsUserId);
                 if(userContactsCount != null)
                 {
@@ -167,17 +190,78 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public async Task<UserProfileModel> CreateUserProfileAsync(CreateUserProfileModel model)
         {
-            return await _userProfileService.CreateItemAsync(model);
+            var result = await ExecuteUpsertOperation
+            (
+                new
+                {
+                    model.Email,
+                    model.FirstName,
+                    model.LastName,
+                    model.BirthDate,
+                    model.Height,
+                    model.Weight,
+                    model.Gender,
+                    model.About,
+                    model.Language
+                },
+                PROFILE_CONTAINER_NAME,
+                new Tuple<string, string>[] 
+                {
+                    new Tuple<string, string>(nameof(UserProfileModel.CroppedProfilePhoto), model.CroppedProfilePhoto),
+                    new Tuple<string, string>(nameof(UserProfileModel.OriginalProfilePhoto), model.OriginalProfilePhoto),
+                    new Tuple<string, string>(nameof(UserProfileModel.BackgroundPhoto), model.BackgroundPhoto),
+                },
+                _userProfileService.CreateItemAsync
+            );
+            return result;
         }
 
         public async Task<UserProfileModel> UpdateUserProfileAsync(UpdateUserProfileModel model)
         {
-            return await _userProfileService.UpdateItemAsync(model); 
+            var result = await ExecuteUpsertOperation
+            (
+                new
+                {
+                    model.Email,
+                    model.FirstName,
+                    model.LastName,
+                    model.BirthDate,
+                    model.Height,
+                    model.Weight,
+                    model.Gender,
+                    model.About,
+                    model.Language
+                },
+                PROFILE_CONTAINER_NAME,
+                new Tuple<string, string>[]
+                {
+                    new Tuple<string, string>(nameof(UserProfileModel.CroppedProfilePhoto), model.CroppedProfilePhoto),
+                    new Tuple<string, string>(nameof(UserProfileModel.OriginalProfilePhoto), model.OriginalProfilePhoto),
+                    new Tuple<string, string>(nameof(UserProfileModel.BackgroundPhoto), model.BackgroundPhoto),
+                },
+                _userProfileService.UpdateItemAsync
+            );
+            return result;
         }
 
         public async Task<string> DeleteUserProfileAsync(string userId)
         {
-            return await _userProfileService.DeleteItemAsync(userId);
+            var result = await _userProfileService.DeleteItemAsync(userId);
+            if (!string.IsNullOrEmpty(result))
+            {
+                await DeleteBlob
+                (
+                    PROFILE_CONTAINER_NAME,
+                    userId,
+                    new string[]
+                    {
+                    nameof(UserProfileModel.CroppedProfilePhoto),
+                    nameof(UserProfileModel.OriginalProfilePhoto),
+                    nameof(UserProfileModel.BackgroundPhoto),
+                    }
+                );
+            }
+            return result;
         }
 
         #endregion
@@ -186,22 +270,84 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public async Task<UserFoodsModel> GetFoodsAsync(GetUserFoodsModel model)
         {
-            return await _foodService.GetItemAsync(model);
+            var result = await _foodService.GetItemAsync(model);
+            if (result != null)
+            {
+                foreach(var food in result.Foods.Items)
+                {
+                    await FillBlobFields
+                    (
+                        food,
+                        FOOD_CONTAINER_NAME,
+                        food.Id,
+                        new string[]
+                        {
+                            nameof(FoodItemModel.Photo),
+                        }
+                    );
+                }
+            }
+            return result;
         }
 
         public async Task<FoodItemModel> AddFoodAsync(AddUserFoodModel model)
         {
-            return await _foodService.AddItemAsync(model);
+            var result = await ExecuteUpsertOperation
+            (
+                new
+                {
+                    model.UserId,
+                    model.Name,
+                    model.Description,
+                    model.Calories
+                },
+                FOOD_CONTAINER_NAME,
+                new Tuple<string, string>[]
+                {
+                    new Tuple<string, string>(nameof(FoodItemModel.Photo), model.Photo)
+                },
+                _foodService.AddItemAsync
+            );
+            return result;
         }
 
         public async Task<FoodItemModel> EditFoodAsync(UpdateUserFoodModel model)
         {
-            return await _foodService.EditItemAsync(model);
+            var result = await ExecuteUpsertOperation
+            (
+                new
+                {
+                    model.UserId,
+                    model.Name,
+                    model.Description,
+                    model.Calories
+                },
+                FOOD_CONTAINER_NAME,
+                new Tuple<string, string>[]
+                {
+                    new Tuple<string, string>(nameof(FoodItemModel.Photo), model.Photo)
+                },
+                _foodService.EditItemAsync
+            );
+            return result;
         }
 
         public async Task<string> RemoveFoodAsync(string userId, string foodId)
         {
-            return await _foodService.RemoveItemAsync(userId, foodId);
+            var result = await _foodService.RemoveItemAsync(userId, foodId);
+            if (!string.IsNullOrEmpty(result))
+            {
+                await DeleteBlob
+                (
+                    FOOD_CONTAINER_NAME,
+                    foodId,
+                    new string[]
+                    {
+                        nameof(FoodItemModel.Photo)
+                    }
+                );
+            }
+            return result;
         }
 
         #endregion
@@ -210,24 +356,143 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public async Task<UserExercisesModel> GetExercisesAsync(GetUserExercisesModel model)
         {
-            return await _exercisesService.GetItemAsync(model);
+            var result = await _exercisesService.GetItemAsync(model);
+            if (result != null)
+            {
+                foreach (var exercise in result.Exercises.Items)
+                {
+                    await FillBlobFields
+                    (
+                        exercise,
+                        EXERCICES_CONTAINER_NAME,
+                        exercise.Id,
+                        new string[]
+                        {
+                            nameof(ExerciseItemModel.Photo)
+                        }
+                    );
+                }
+            }
+            return result;
         }
 
         public async Task<ExerciseItemModel> AddExerciseAsync(AddUserExerciseModel model)
         {
-            return await _exercisesService.AddItemAsync(model);
+            var result = await ExecuteUpsertOperation
+            (
+                new
+                {
+                    model.UserId,
+                    model.Name,
+                    model.Description,
+                    model.Calories
+                },
+                EXERCICES_CONTAINER_NAME,
+                new Tuple<string, string>[]
+                {
+                    new Tuple<string, string>(nameof(ExerciseItemModel.Photo), model.Photo)
+                },
+                _exercisesService.AddItemAsync
+            );
+            return result;
         }
 
         public async Task<ExerciseItemModel> EditExerciseAsync(UpdateUserExerciseModel model)
         {
-            return await _exercisesService.EditItemAsync(model);
+            var result = await ExecuteUpsertOperation
+            (
+                new
+                {
+                    model.UserId,
+                    model.Name,
+                    model.Description,
+                    model.Calories
+                },
+                EXERCICES_CONTAINER_NAME,
+                new Tuple<string, string>[]
+                {
+                    new Tuple<string, string>(nameof(ExerciseItemModel.Photo), model.Photo)
+                },
+                _exercisesService.EditItemAsync
+            );
+            return result;
         }
 
         public async Task<string> RemoveExerciseAsync(string userId, string exerciseId)
         {
-            return await _exercisesService.RemoveItemAsync(userId, exerciseId);
+            var result = await _exercisesService.RemoveItemAsync(userId, exerciseId);
+            if (!string.IsNullOrEmpty(result))
+            {
+                await DeleteBlob
+                (
+                    EXERCICES_CONTAINER_NAME,
+                    exerciseId,
+                    new string[]
+                    {
+                        nameof(ExerciseItemModel.Photo)
+                    }
+                );
+            }
+            return result;
         }
 
         #endregion
+
+        private async Task<Model> ExecuteUpsertOperation<Model>
+        (
+            object data, 
+            string blobContainerName, 
+            Tuple<string, string>[] blobFields, 
+            Func<object, Task<Model>> executeService
+        )
+            where Model: IBlobModel
+        {
+            var upsertResult = await executeService(data);
+            foreach(var blobField in blobFields)
+            {
+                var blobContent = Encoding.Default.GetBytes(blobField.Item2);
+                await _blobService.UploadFile(blobContainerName, CreateBlobName(blobField.Item1, upsertResult.Id), new MemoryStream(blobContent));
+                var propertyInfo = typeof(Model).GetProperty(blobField.Item1);
+                propertyInfo.SetValue(upsertResult, blobField.Item2);
+            }
+            return upsertResult;
+        }
+
+        private async Task FillBlobFields<Model>
+        (
+            Model data,
+            string blobContainerName,
+            string objectId,
+            string[] blobFields
+        )
+            where Model : IBlobModel
+        {
+            foreach (var blobField in blobFields)
+            {
+                var blobContent = await _blobService.DownloadFile(blobContainerName, CreateBlobName(blobField, objectId)); 
+                var blobValue = new byte[blobContent.Length];
+                await blobContent.ReadAsync(blobValue, 0, (int)blobContent.Length);
+                var propertyInfo = typeof(Model).GetProperty(blobField);
+                propertyInfo.SetValue(data, blobValue);
+            }
+        }
+
+        private async Task DeleteBlob
+        (
+            string blobContainerName,
+            string objectId,
+            string[] blobFields
+        )
+        {
+            foreach (var blobField in blobFields)
+            {
+                await _blobService.DeleteFile(blobContainerName, CreateBlobName(blobField, objectId));
+            }
+        }
+
+        private string CreateBlobName(string propertyName, string objectId)
+        {
+            return $"{propertyName}_{objectId}";
+        }
     }
 }

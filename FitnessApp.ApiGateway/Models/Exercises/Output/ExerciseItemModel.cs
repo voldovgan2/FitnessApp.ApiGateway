@@ -1,8 +1,9 @@
-﻿using System;
+﻿using FitnessApp.ApiGateway.Models.Blob.Output;
+using System;
 
 namespace FitnessApp.ApiGateway.Models.Exercises.Output
 {
-    public class ExerciseItemModel
+    public class ExerciseItemModel : IBlobModel
     {
         public string Id { get; set; }
         public string Name { get; set; }

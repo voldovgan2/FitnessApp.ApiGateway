@@ -418,7 +418,7 @@ namespace FitnessApp.ApiGateway.Controllers
 
         #endregion
 
-        #region Food
+        #region Exercises
 
         [HttpGet("GetExercises")]
         public async Task<IActionResult> GetExercisesAsync([FromQuery] GetUserExercisesContract contract)

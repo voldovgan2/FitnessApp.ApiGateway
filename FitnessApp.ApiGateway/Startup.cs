@@ -9,6 +9,7 @@ using FitnessApp.ApiGateway.Models.Food.Output;
 using FitnessApp.ApiGateway.Models.Settings.Output;
 using FitnessApp.ApiGateway.Models.UserProfile.Output;
 using FitnessApp.ApiGateway.Services.Aggregator;
+using FitnessApp.ApiGateway.Services.Blob;
 using FitnessApp.ApiGateway.Services.Contacts;
 using FitnessApp.ApiGateway.Services.Exercises;
 using FitnessApp.ApiGateway.Services.Food;
@@ -71,6 +72,8 @@ namespace FitnessApp.ApiGateway
 
             services.AddTransient<IAggregatorService, AggregatorService>();
 
+            services.AddTransient<IBlobService, BlobService>();
+
             var internalApiSection = Configuration.GetSection("Apis:Internal");
             services.Configure<AuthenticationSettings>(internalApiSection);
 
@@ -87,6 +90,9 @@ namespace FitnessApp.ApiGateway
                 //.OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
                 //.WaitAndRetryAsync(int.Parse(internalApiSection.GetSection("RetryAttempt").Value), retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
                 ;
+
+            var blobSettingsSection = Configuration.GetSection("BlobSettings");
+            services.Configure<BlobSettings>(blobSettingsSection);
 
             services.AddBaseApiClient("Settings", Configuration);
             services.AddBaseApiClient("UserProfile", Configuration);
