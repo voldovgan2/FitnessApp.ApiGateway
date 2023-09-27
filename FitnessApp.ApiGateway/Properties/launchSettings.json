@@ -11,6 +11,8 @@
   "profiles": {
     "FitnessApp.ApiGateway": {
       "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:20000/swagger",
       "applicationUrl": "http://localhost:20000"
     }
   }

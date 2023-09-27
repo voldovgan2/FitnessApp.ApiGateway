@@ -1,5 +1,5 @@
-﻿using FitnessApp.ApiGateway.Enums.UserProfile;
-using System;
+﻿using System;
+using FitnessApp.ApiGateway.Enums.UserProfile;
 
 namespace FitnessApp.ApiGateway.Models.UserProfile.Input
 {

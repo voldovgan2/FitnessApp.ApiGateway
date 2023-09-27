@@ -1,111 +1,83 @@
-﻿using FitnessApp.ApiGateway.Configuration;
+﻿using System.Net.Http;
+using System.Threading.Tasks;
+using FitnessApp.ApiGateway.Configuration;
 using FitnessApp.ApiGateway.Models.Internal;
 using FitnessApp.ApiGateway.Services.InternalClient;
-using FitnessApp.Serializer.JsonSerializer;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FitnessApp.ApiGateway.Services.Abstractions.Collection
 {
-    public class CollectionService<Model, CollectionItem> : ICollectionService<Model, CollectionItem>
+    public class CollectionService<TModel, TCollectionItem> : ICollectionService<TModel, TCollectionItem>
     {
         private readonly IInternalClient _internalClient;
-        private readonly CollectionApiClientSettings _apiClientSettings;
+        private readonly AuthenticationTokenRequest _authenticationTokenRequest;
 
-        public CollectionService
-        (
-            string name,
-            IHttpClientFactory httpClientFactory,
-            IDistributedCache distributedCache,
-            IOptions<AuthenticationSettings> authenticationSettings,
-            IOptionsMonitor<CollectionApiClientSettings> optionsMonitor,
-            IJsonSerializer serializer,
-            ILoggerFactory loggerFactory
-        )
+        public CollectionService(ApiClientSettings apiClientSettings, IInternalClient internalClient)
         {
-            _apiClientSettings = optionsMonitor.Get(name);
-            _apiClientSettings.ApiName = name;
-            _internalClient = new InternalClient.InternalClient
-            (
-                httpClientFactory,
-                distributedCache,
-                authenticationSettings.Value,
-                name,
-                _apiClientSettings.Scope,
-                serializer,
-                loggerFactory
-            );
+            _internalClient = internalClient;
+            _authenticationTokenRequest = new AuthenticationTokenRequest
+            {
+                ApiName = apiClientSettings.ApiName,
+                Scope = apiClientSettings.Scope
+            };
         }
 
-        public async Task<Model> GetItemAsync(object model)
+        public async Task<TModel> GetItem(string baseUrl, string api, string methodName, object payload)
         {
-            var request = new InternalRequest
-            (
-                HttpMethod.Get, 
-                _apiClientSettings.Url, 
-                _apiClientSettings.ApiName, 
-                _apiClientSettings.GetItemsMethodName,
-                null, 
+            var request = new InternalRequest(
+                HttpMethod.Get,
+                baseUrl,
+                api,
+                methodName,
                 null,
-                model
-            );
-            var result = await _internalClient.SendInternalRequest<Model>(request, CancellationToken.None);
+                null,
+                payload);
+            var result = await _internalClient.SendInternalRequest<TModel>(_authenticationTokenRequest, request);
             return result;
         }
 
-        public async Task<CollectionItem> AddItemAsync(object model)
+        public async Task<TCollectionItem> AddItem(string baseUrl, string api, string methodName, object payload)
         {
-            var request = new InternalRequest
-            (
-                HttpMethod.Put, 
-                _apiClientSettings.Url, 
-                _apiClientSettings.ApiName, 
-                _apiClientSettings.AddItemMethodName, 
-                null, 
-                model, 
-                null
-            );
-            var result = await _internalClient.SendInternalRequest<CollectionItem>(request, CancellationToken.None);
+            var request = new InternalRequest(
+                HttpMethod.Post,
+                baseUrl,
+                api,
+                methodName,
+                null,
+                payload,
+                null);
+            var result = await _internalClient.SendInternalRequest<TCollectionItem>(_authenticationTokenRequest, request);
             return result;
         }
 
-        public async Task<CollectionItem> EditItemAsync(object model)
+        public async Task<TCollectionItem> EditItem(string baseUrl, string api, string methodName, object payload)
         {
-            var request = new InternalRequest
-            (
-                HttpMethod.Put, 
-                _apiClientSettings.Url, 
-                _apiClientSettings.ApiName, 
-                _apiClientSettings.EditItemMethodName, 
-                null, 
-                model, 
-                null
-            );
-            var result = await _internalClient.SendInternalRequest<CollectionItem>(request, CancellationToken.None);
+            var request = new InternalRequest(
+                HttpMethod.Put,
+                baseUrl,
+                api,
+                methodName,
+                null,
+                payload,
+                null);
+            var result = await _internalClient.SendInternalRequest<TCollectionItem>(_authenticationTokenRequest, request);
             return result;
         }
 
-        public async Task<string> RemoveItemAsync(string userId, string id)
+        public async Task<string> RemoveItem(string baseUrl, string api, string methodName, string userId, string id)
         {
-            var request = new InternalRequest
-            (
-                HttpMethod.Delete, 
-                _apiClientSettings.Url, 
-                _apiClientSettings.ApiName, 
-                _apiClientSettings.RemoveItemMethodName,
-                new string[] 
+            var request = new InternalRequest(
+                HttpMethod.Delete,
+                baseUrl,
+                api,
+                methodName,
+                new string[]
                 {
-                    userId, 
-                    id 
-                }, 
-                null, 
-                null
-            );
-            var result = await _internalClient.SendInternalRequest<string>(request, CancellationToken.None);
+                    userId,
+                    id
+                },
+                null,
+                null);
+            var result = await _internalClient.SendInternalRequest<string>(_authenticationTokenRequest, request);
             return result;
         }
     }

@@ -1,5 +1,5 @@
 ﻿using FitnessApp.ApiGateway.Enums.Contacts;
-using FitnessApp.Paged.Models.Input;
+using FitnessApp.Common.Paged.Models.Input;
 
 namespace FitnessApp.ApiGateway.Models.Contacts.Input
 {

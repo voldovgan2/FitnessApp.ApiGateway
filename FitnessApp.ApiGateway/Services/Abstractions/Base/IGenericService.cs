@@ -1,14 +1,14 @@
-﻿using FitnessApp.Paged.Models.Output;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using FitnessApp.Common.Paged.Models.Output;
 
 namespace FitnessApp.ApiGateway.Services.Abstractions.Base
 {
-    public interface IGenericService<Model>
+    public interface IGenericService<TModel>
     {
-        Task<PagedDataModel<Model>> GetItemsAsync(object model);
-        Task<Model> GetItemAsync(string userId);
-        Task<Model> CreateItemAsync(object model);
-        Task<Model> UpdateItemAsync(object model);
-        Task<string> DeleteItemAsync(string userId);
+        Task<PagedDataModel<TModel>> GetItems(string baseUrl, string api, string methodName, object payload);
+        Task<TModel> GetItem(string baseUrl, string api, string methodName, string userId);
+        Task<TModel> CreateItem(string baseUrl, string api, string methodName, object payload);
+        Task<TModel> UpdateItem(string baseUrl, string api, string methodName, object payload);
+        Task<string> DeleteItem(string baseUrl, string api, string methodName, string userId);
     }
 }

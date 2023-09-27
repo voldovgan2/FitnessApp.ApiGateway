@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace FitnessApp.ApiGateway.Configuration
+﻿namespace FitnessApp.ApiGateway.Configuration
 {
     public class AuthenticationSettings
     {

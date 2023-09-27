@@ -1,231 +1,230 @@
-﻿using FitnessApp.ApiGateway.Models.Contacts.Input;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using FitnessApp.ApiGateway.Models.Contacts.Input;
 using FitnessApp.ApiGateway.Models.Exercises.Input;
 using FitnessApp.ApiGateway.Models.Exercises.Output;
 using FitnessApp.ApiGateway.Models.Food.Input;
 using FitnessApp.ApiGateway.Models.Food.Output;
 using FitnessApp.ApiGateway.Models.Settings.Input;
 using FitnessApp.ApiGateway.Models.Settings.Output;
+using FitnessApp.ApiGateway.Models.SignalR;
 using FitnessApp.ApiGateway.Models.UserProfile.Input;
 using FitnessApp.ApiGateway.Models.UserProfile.Output;
 using FitnessApp.ApiGateway.Services.Contacts;
 using FitnessApp.ApiGateway.Services.Exercises;
 using FitnessApp.ApiGateway.Services.Food;
 using FitnessApp.ApiGateway.Services.Settings;
+using FitnessApp.ApiGateway.Services.SignalR;
 using FitnessApp.ApiGateway.Services.UserProfile;
-using FitnessApp.Paged.Extensions;
-using FitnessApp.Paged.Models.Output;
-using System.Linq;
-using System.Threading.Tasks;
+using FitnessApp.Common.Paged.Extensions;
+using FitnessApp.Common.Paged.Models.Output;
 
 namespace FitnessApp.ApiGateway.Services.Aggregator
 {
     public class AggregatorService : IAggregatorService
     {
         private readonly IContactsService _contactsService;
-        private readonly ISettingsService<SettingsModel> _settingsService;
-        private readonly IUserProfileService<UserProfileModel> _userProfileService;
-        private readonly IFoodService<UserFoodsModel, FoodItemModel> _foodService;
-        private readonly IExercisesService<UserExercisesModel, ExerciseItemModel> _exercisesService;
+        private readonly ISettingsService _settingsService;
+        private readonly IUserProfileService _userProfileService;
+        private readonly IFoodService _foodService;
+        private readonly IExercisesService _exercisesService;
+        private readonly ISignalR _signalR;
 
-        public AggregatorService
-        (
+        public AggregatorService(
             IContactsService contactsService,
-            ISettingsService<SettingsModel> settingsService,
-            IUserProfileService<UserProfileModel> userProfileService,
-            IFoodService<UserFoodsModel, FoodItemModel> foodService,
-            IExercisesService<UserExercisesModel, ExerciseItemModel> exercisesService
-        )
+            ISettingsService settingsService,
+            IUserProfileService userProfileService,
+            IFoodService foodService,
+            IExercisesService exercisesService,
+            ISignalR signalR)
         {
             _contactsService = contactsService;
             _settingsService = settingsService;
             _userProfileService = userProfileService;
             _foodService = foodService;
             _exercisesService = exercisesService;
+            _signalR = signalR;
         }
 
         #region Contacts
 
-        public async Task<bool> CanViewUserContactsAsync(GetUserContactsModel model)
+        public Task<bool> CanViewUserContacts(GetUserContactsModel model)
         {
-            var result = await _contactsService.CanViewUserContactsAsync(model);
-            return result;
+            return _contactsService.CanViewUserContacts(model);
         }
 
-        public async Task<PagedDataModel<UserProfileModel>> GetUserContactsAsync(GetUserContactsModel model)
+        public async Task<PagedDataModel<UserProfileModel>> GetUserContacts(GetUserContactsModel model)
         {
             PagedDataModel<UserProfileModel> result = null;
-            var contacts = await _contactsService.GetUserContactsAsync(model);
+            var contacts = await _contactsService.GetUserContacts(model);
             if (contacts != null)
             {
                 var getSelectedUsersProfilesModel = new GetSelectedUsersProfilesModel
                 {
                     UsersIds = contacts.Select(i => i.UserId)
                 };
-                var profiles = await _userProfileService.GetUsersProfilesAsync(getSelectedUsersProfilesModel);
+                var profiles = await _userProfileService.GetUsersProfiles(getSelectedUsersProfilesModel);
                 if (profiles != null)
                 {
                     foreach (var item in profiles)
                     {
-                        item.CanFollow = !await _contactsService.IsFollowerAsync(new GetUserContactsModel
+                        item.CanFollow = !await _contactsService.IsFollower(new GetUserContactsModel
                         {
                             UserId = model.UserId,
                             ContactsUserId = item.UserId
                         });
                     }
+
                     result = profiles.ToPaged(model);
                 }
             }
+
             return result;
         }
 
-        public async Task<string> StartFollowAsync(SendFollowModel model)
+        public Task<string> StartFollow(SendFollowModel model)
         {
-            var result = await _contactsService.StartFollowAsync(model);
+            return _contactsService.StartFollow(model);
+        }
+
+        public async Task<string> AcceptFollowRequest(ProcessFollowRequestModel model)
+        {
+            var result = await _contactsService.AcceptFollowRequest(model);
+            if (result != null)
+            {
+                await _signalR.SendMessage(new FollowRequestConfirmedModel
+                {
+                    Sender = model.UserId,
+                    Receiver = model.FollowerUserId
+                });
+            }
+
             return result;
         }
 
-        public async Task<string> AcceptFollowRequestAsync(ProcessFollowRequestModel model)
+        public Task<string> RejectFollowRequest(ProcessFollowRequestModel model)
         {
-            var result = await _contactsService.AcceptFollowRequestAsync(model);
-            return result;
+            return _contactsService.RejectFollowRequest(model);
         }
 
-        public async Task<string> RejectFollowRequestAsync(ProcessFollowRequestModel model)
+        public Task<string> DeleteFollowRequest(SendFollowModel model)
         {
-            var result = await _contactsService.RejectFollowRequestAsync(model);
-            return result;
+            return _contactsService.DeleteFollowRequest(model);
         }
 
-        public async Task<string> DeleteFollowRequestAsync(SendFollowModel model)
+        public Task<string> DeleteFollower(ProcessFollowRequestModel model)
         {
-            var result = await _contactsService.DeleteFollowRequestAsync(model);
-            return result;
+            return _contactsService.DeleteFollower(model);
         }
 
-        public async Task<string> DeleteFollowerAsync(ProcessFollowRequestModel model)
+        public Task<string> UnfollowUser(SendFollowModel model)
         {
-            var result = await _contactsService.DeleteFollowerAsync(model);
-            return result;
-        }
-
-        public async Task<string> UnfollowUserAsync(SendFollowModel model)
-        {
-            var result = await _contactsService.UnfollowUserAsync(model);
-            return result;
+            return _contactsService.UnfollowUser(model);
         }
 
         #endregion
 
         #region Settings
 
-        public async Task<SettingsModel> GetSettingsAsync(string userId)
+        public Task<SettingsModel> GetSettings(string userId)
         {
-            return await _settingsService.GetItemAsync(userId);
+            return _settingsService.GetSettings(userId);
         }
 
-        public async Task<SettingsModel> CreateSettingsAsync(CreateSettingsModel model)
+        public Task<SettingsModel> CreateSettings(CreateSettingsModel model)
         {
-            return await _settingsService.CreateItemAsync(model);
+            return _settingsService.CreateSettings(model);
         }
 
-        public async Task<SettingsModel> UpdateSettingsAsync(UpdateSettingsModel model)
+        public Task<SettingsModel> UpdateSettings(UpdateSettingsModel model)
         {
-            return await _settingsService.UpdateItemAsync(model);
+            return _settingsService.UpdateSettings(model);
         }
 
-        public async Task<string> DeleteSettingsAsync(string userId)
+        public Task<string> DeleteSettings(string userId)
         {
-            return await _settingsService.DeleteItemAsync(userId);
+            return _settingsService.DeleteSettings(userId);
         }
 
         #endregion
 
         #region UserProfile
 
-        public async Task<UserProfileModel> GetUserProfileAsync(GetUserProfileModel model)
+        public Task<UserProfileModel> GetUserProfile(GetUserProfileModel model)
         {
-            UserProfileModel result =  await _userProfileService.GetItemAsync(model.ContactsUserId);
-            if (result != null)
-            {
-                var userContactsCount = await _contactsService.GetUserContactsCountAsync(model.ContactsUserId);
-                if(userContactsCount != null)
-                {
-                    result.FollowersCount = userContactsCount.FollowersCount;
-                    result.FollowingsCount = userContactsCount.FollowingsCount;                    
-                }
-                if(model.ContactsUserId != model.UserId)
-                {
-                    result.CanFollow = !await _contactsService.IsFollowerAsync(new GetUserContactsModel
-                    {
-                        UserId = model.UserId,
-                        ContactsUserId = model.ContactsUserId
-                    });
-                }
-            }
-            return result;
+            return _userProfileService.GetUserProfile(model.ContactsUserId);
         }
 
-        public async Task<UserProfileModel> CreateUserProfileAsync(CreateUserProfileModel model)
+        public Task<UserProfileModel> CreateUserProfile(CreateUserProfileModel model)
         {
-            return await _userProfileService.CreateItemAsync(model);
+            return _userProfileService.CreateUserProfile(model);
         }
 
-        public async Task<UserProfileModel> UpdateUserProfileAsync(UpdateUserProfileModel model)
+        public Task<UserProfileModel> UpdateUserProfile(UpdateUserProfileModel model)
         {
-            return await _userProfileService.UpdateItemAsync(model); 
+            return _userProfileService.UpdateUserProfile(model);
         }
 
-        public async Task<string> DeleteUserProfileAsync(string userId)
+        public Task<string> DeleteUserProfile(string userId)
         {
-            return await _userProfileService.DeleteItemAsync(userId);
+            return _userProfileService.DeleteUserProfile(userId);
         }
 
         #endregion
 
-        #region Food 
+        #region Food
 
-        public async Task<UserFoodsModel> GetFoodsAsync(GetUserFoodsModel model)
+        public Task<UserFoodsModel> GetFoods(GetUserFoodsModel model)
         {
-            return await _foodService.GetItemAsync(model);
+            return _foodService.GetFoods(model);
         }
 
-        public async Task<FoodItemModel> AddFoodAsync(AddUserFoodModel model)
+        public async Task<FoodItemModel> AddFood(AddUserFoodModel model)
         {
-            return await _foodService.AddItemAsync(model);
+            return await _foodService.AddFood(model);
         }
 
-        public async Task<FoodItemModel> EditFoodAsync(UpdateUserFoodModel model)
+        public async Task<FoodItemModel> EditFood(UpdateUserFoodModel model)
         {
-            return await _foodService.EditItemAsync(model);
+            return await _foodService.EditFood(model);
         }
 
-        public async Task<string> RemoveFoodAsync(string userId, string foodId)
+        public async Task<string> RemoveFood(string userId, string foodId)
         {
-            return await _foodService.RemoveItemAsync(userId, foodId);
+            return await _foodService.RemoveFood(userId, foodId);
         }
 
         #endregion
 
-        #region Exercises 
+        #region Exercises
 
-        public async Task<UserExercisesModel> GetExercisesAsync(GetUserExercisesModel model)
+        public async Task<UserExercisesModel> GetExercises(GetUserExercisesModel model)
         {
-            return await _exercisesService.GetItemAsync(model);
+            return await _exercisesService.GetExercises(model);
         }
 
-        public async Task<ExerciseItemModel> AddExerciseAsync(AddUserExerciseModel model)
+        public async Task<ExerciseItemModel> AddExercise(AddUserExerciseModel model)
         {
-            return await _exercisesService.AddItemAsync(model);
+            return await _exercisesService.AddExercise(model);
         }
 
-        public async Task<ExerciseItemModel> EditExerciseAsync(UpdateUserExerciseModel model)
+        public async Task<ExerciseItemModel> EditExercise(UpdateUserExerciseModel model)
         {
-            return await _exercisesService.EditItemAsync(model);
+            return await _exercisesService.EditExercise(model);
         }
 
-        public async Task<string> RemoveExerciseAsync(string userId, string exerciseId)
+        public async Task<string> RemoveExercise(string userId, string exerciseId)
         {
-            return await _exercisesService.RemoveItemAsync(userId, exerciseId);
+            return await _exercisesService.RemoveExercise(userId, exerciseId);
+        }
+
+        #endregion
+
+        #region SignalR
+
+        public Task<string> GetToken()
+        {
+            return _signalR.GetToken();
         }
 
         #endregion

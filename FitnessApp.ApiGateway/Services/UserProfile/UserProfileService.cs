@@ -1,63 +1,67 @@
-﻿using FitnessApp.ApiGateway.Configuration;
+﻿using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using FitnessApp.ApiGateway.Configuration;
 using FitnessApp.ApiGateway.Models.Internal;
 using FitnessApp.ApiGateway.Models.UserProfile.Input;
+using FitnessApp.ApiGateway.Models.UserProfile.Output;
 using FitnessApp.ApiGateway.Services.Abstractions.Base;
 using FitnessApp.ApiGateway.Services.InternalClient;
-using FitnessApp.Serializer.JsonSerializer;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FitnessApp.ApiGateway.Services.UserProfile
 {
-    public class UserProfileService<Model> : GenericService<Model>, IUserProfileService<Model>
+    public class UserProfileService : GenericService<UserProfileModel>, IUserProfileService
     {
-        private readonly IInternalClient _internalClient;
-        private readonly ApiClientSettings _apiClientSettings;
-        private const string _serviceName = "UserProfile";
+        private const string API = "UserProfile";
+        private const string GET_USER_PROFILE_METHOD = "GetUserProfile";
+        private const string CREATE_USER_PROFILE_METHOD = "CreateUserProfile";
+        private const string UPDATE_USER_PROFILE_METHOD = "UpdateUserProfile";
+        private const string DELETE_USER_PROFILE_METHOD = "DeleteUserProfile";
+        private const string GET_USER_PROFILES_METHOD = "GetUserProfiles";
 
-        public UserProfileService
-        (
-            IHttpClientFactory httpClientFactory,
-            IDistributedCache distributedCache,
-            IOptions<AuthenticationSettings> authenticationSettings,
-            IOptionsMonitor<ApiClientSettings> optionsMonitor,
-            IJsonSerializer serializer,
-            ILoggerFactory loggerFactory
-        )
-            : base(_serviceName, httpClientFactory, distributedCache, authenticationSettings, optionsMonitor, serializer, loggerFactory)
+        private readonly ApiClientSettings _apiClientSettings;
+        private readonly IInternalClient _internalClient;
+
+        public UserProfileService(
+            ApiClientSettings apiClientSettings,
+            IInternalClient internalClient)
+            : base(apiClientSettings, internalClient)
         {
-            _apiClientSettings = optionsMonitor.Get(_serviceName);
-            _apiClientSettings.ApiName = _serviceName;
-            _internalClient = new InternalClient.InternalClient
-            (
-                httpClientFactory,
-                distributedCache,
-                authenticationSettings.Value,
-                _serviceName,
-                _apiClientSettings.Scope,
-                serializer,
-                loggerFactory
-            );
+            _apiClientSettings = apiClientSettings;
+            _internalClient = internalClient;
         }
 
-        public async Task<IEnumerable<Model>> GetUsersProfilesAsync(GetSelectedUsersProfilesModel model)
+        public Task<UserProfileModel> GetUserProfile(string userId)
         {
-            var request = new InternalRequest
-            (
-                HttpMethod.Get, 
+            return GetItem(_apiClientSettings.Url, API, GET_USER_PROFILE_METHOD, userId);
+        }
+
+        public Task<UserProfileModel> CreateUserProfile(CreateUserProfileModel model)
+        {
+            return CreateItem(_apiClientSettings.Url, API, CREATE_USER_PROFILE_METHOD, model);
+        }
+
+        public Task<UserProfileModel> UpdateUserProfile(UpdateUserProfileModel model)
+        {
+            return CreateItem(_apiClientSettings.Url, API, UPDATE_USER_PROFILE_METHOD, model);
+        }
+
+        public Task<string> DeleteUserProfile(string userId)
+        {
+            return DeleteItem(_apiClientSettings.Url, API, DELETE_USER_PROFILE_METHOD, userId);
+        }
+
+        public async Task<IEnumerable<UserProfileModel>> GetUsersProfiles(GetSelectedUsersProfilesModel model)
+        {
+            var request = new InternalRequest(
+                HttpMethod.Get,
                 _apiClientSettings.Url,
-                _apiClientSettings.ApiName, 
-                "GetUsersProfiles", 
-                null, 
-                model, 
-                null
-            );
-            IEnumerable<Model> result = await _internalClient.SendInternalRequest<IEnumerable<Model>>(request, CancellationToken.None);            
+                _apiClientSettings.ApiName,
+                GET_USER_PROFILES_METHOD,
+                null,
+                model,
+                null);
+            IEnumerable<UserProfileModel> result = await _internalClient.SendInternalRequest<IEnumerable<UserProfileModel>>(null, request);
             return result;
         }
     }

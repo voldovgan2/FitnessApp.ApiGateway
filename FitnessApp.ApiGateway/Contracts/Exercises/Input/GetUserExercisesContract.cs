@@ -1,4 +1,4 @@
-﻿using FitnessApp.Paged.Contracts.Input;
+﻿using FitnessApp.Common.Paged.Contracts.Input;
 
 namespace FitnessApp.ApiGateway.Contracts.Exercises.Input
 {

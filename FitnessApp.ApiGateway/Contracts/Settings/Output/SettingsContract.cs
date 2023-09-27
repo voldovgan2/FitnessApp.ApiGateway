@@ -1,5 +1,4 @@
-﻿
-using FitnessApp.ApiGateway.Enums.Settings;
+﻿using FitnessApp.ApiGateway.Enums.Settings;
 
 namespace FitnessApp.ApiGateway.Contracts.Settings.Output
 {

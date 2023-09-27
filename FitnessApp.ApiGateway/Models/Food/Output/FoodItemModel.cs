@@ -1,8 +1,9 @@
 ﻿using System;
+using FitnessApp.ApiGateway.Models.Blob.Output;
 
 namespace FitnessApp.ApiGateway.Models.Food.Output
 {
-    public class FoodItemModel
+    public class FoodItemModel : IBlobModel
     {
         public string Id { get; set; }
         public string Name { get; set; }

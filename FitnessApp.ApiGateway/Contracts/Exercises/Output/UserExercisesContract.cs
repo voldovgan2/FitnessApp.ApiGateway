@@ -1,4 +1,4 @@
-﻿using FitnessApp.Paged.Contracts.Output;
+﻿using FitnessApp.Common.Paged.Contracts.Output;
 
 namespace FitnessApp.ApiGateway.Contracts.Exercises.Output
 {

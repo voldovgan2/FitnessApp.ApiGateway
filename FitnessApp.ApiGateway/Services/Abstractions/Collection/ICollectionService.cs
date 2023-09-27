@@ -2,11 +2,11 @@
 
 namespace FitnessApp.ApiGateway.Services.Abstractions.Collection
 {
-    public interface ICollectionService<Model, CollectionItem>
+    public interface ICollectionService<TModel, TCollectionItem>
     {
-        Task<Model> GetItemAsync(object model);
-        Task<CollectionItem> AddItemAsync(object model);
-        Task<CollectionItem> EditItemAsync(object model);
-        Task<string> RemoveItemAsync(string userId, string id);
+        Task<TModel> GetItem(string baseUrl, string api, string methodName, object payload);
+        Task<TCollectionItem> AddItem(string baseUrl, string api, string methodName, object payload);
+        Task<TCollectionItem> EditItem(string baseUrl, string api, string methodName, object payload);
+        Task<string> RemoveItem(string baseUrl, string api, string methodName, string userId, string id);
     }
 }

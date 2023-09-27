@@ -1,12 +1,12 @@
-﻿using FitnessApp.ApiGateway.Models.Internal;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using FitnessApp.ApiGateway.Models.Internal;
 
 namespace FitnessApp.ApiGateway.Services.InternalClient
 {
     public interface IInternalClient
     {
-        Task<TResponse> SendInternalRequest<TResponse>(InternalRequest internalRequest, CancellationToken cancelationToken);
+        Task<TResponse> SendInternalRequest<TResponse>(
+            AuthenticationTokenRequest authenticationTokenRequest,
+            InternalRequest internalRequest);
     }
 }

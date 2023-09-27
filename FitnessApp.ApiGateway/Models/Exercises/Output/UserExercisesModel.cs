@@ -1,4 +1,4 @@
-﻿using FitnessApp.Paged.Models.Output;
+﻿using FitnessApp.Common.Paged.Models.Output;
 
 namespace FitnessApp.ApiGateway.Models.Exercises.Output
 {

@@ -11,11 +11,5 @@ namespace FitnessApp.ApiGateway.Extensions
             services.Configure<ApiClientSettings>(apiName, configuration.GetSection($"Apis:{apiName}"));
             return services;
         }
-
-        public static IServiceCollection AddCollectionApiClient(this IServiceCollection services, string apiName, IConfiguration configuration)
-        {
-            services.Configure<CollectionApiClientSettings>(apiName, configuration.GetSection($"Apis:{apiName}"));
-            return services;
-        }
     }
 }

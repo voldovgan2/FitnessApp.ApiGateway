@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace FitnessApp.ApiGateway.Extensions
 {
@@ -8,29 +9,29 @@ namespace FitnessApp.ApiGateway.Extensions
     {
         public static string Api(this string url, string apiName)
         {
-            string trailingSlash = url.EndsWith("/") ? "" : "/";
+            string trailingSlash = url.EndsWith('/') ? "" : "/";
             return $"{url}{trailingSlash}api/{apiName}";
         }
 
         public static string Method(this string url, string methodName)
         {
-            string trailingSlash = url.EndsWith("/") ? "" : "/";
+            string trailingSlash = url.EndsWith('/') ? "" : "/";
             return $"{url}{trailingSlash}{methodName}";
         }
 
         public static string Routes(this string url, string[] routes)
         {
-            string trailingSlash = url.EndsWith("/") ? "" : "/";
+            string trailingSlash = url.EndsWith('/') ? "" : "/";
             return $"{url}{trailingSlash}{string.Join("/", routes)}";
         }
 
         public static string ToQueryString(this string url, object model)
         {
-            string result = url;
+            StringBuilder result = new StringBuilder(url);
             var propertiesInfo = model.GetType().GetProperties();
             if (propertiesInfo.Any())
             {
-                result += "?";
+                result.Append('?');
                 bool isFirstParameter = true;
                 for (int k = 0; k < propertiesInfo.Length; k++)
                 {
@@ -39,14 +40,16 @@ namespace FitnessApp.ApiGateway.Extensions
                     {
                         if (!isFirstParameter)
                         {
-                            result += "&";
+                            result.Append('&');
                         }
+
                         isFirstParameter = false;
-                        result += propertiesInfo[k].Name + "=" + propertyValue.ToString();
+                        result.Append(propertiesInfo[k].Name + "=" + propertyValue.ToString());
                     }
                 }
             }
-            return result;
+
+            return result.ToString();
         }
 
         private static object GetProperty(object instance, PropertyInfo propertyInfo)
@@ -72,6 +75,7 @@ namespace FitnessApp.ApiGateway.Extensions
                     result = propertyInfo.GetValue(instance, null);
                     break;
             }
+
             return result;
         }
     }
