@@ -3,10 +3,12 @@ using FitnessApp.ApiGateway.Services.Contacts;
 using FitnessApp.ApiGateway.Services.Exercises;
 using FitnessApp.ApiGateway.Services.Food;
 using FitnessApp.ApiGateway.Services.InternalClient;
+using FitnessApp.ApiGateway.Services.NotificationService;
 using FitnessApp.ApiGateway.Services.Settings;
-using FitnessApp.ApiGateway.Services.SignalR;
-using FitnessApp.ApiGateway.Services.TokenClient;
 using FitnessApp.ApiGateway.Services.UserProfile;
+using FitnessApp.Common.Serializer.JsonSerializer;
+using FitnessApp.Common.ServiceBus.Nats.Services;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -80,15 +82,15 @@ namespace FitnessApp.ApiGateway.Extensions
             return services;
         }
 
-        public static IServiceCollection AddSignalRService(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddNotificationService(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddTransient<ISignalR, SignalR>(
+            services.AddTransient<INotificationService, NotificationService>(
                 sp =>
                 {
-                    return new SignalR(
-                        GetApiClientSettings("SignalR", configuration),
-                        sp.GetRequiredService<ITokenClient>(),
-                        sp.GetRequiredService<IInternalClient>());
+                    return new NotificationService(
+                        sp.GetRequiredService<IServiceBus>(),
+                        sp.GetRequiredService<IDistributedCache>(),
+                        sp.GetRequiredService<IJsonSerializer>());
                 }
             );
             return services;

@@ -5,19 +5,20 @@ using FitnessApp.ApiGateway.Models.Exercises.Input;
 using FitnessApp.ApiGateway.Models.Exercises.Output;
 using FitnessApp.ApiGateway.Models.Food.Input;
 using FitnessApp.ApiGateway.Models.Food.Output;
+using FitnessApp.ApiGateway.Models.Notification;
 using FitnessApp.ApiGateway.Models.Settings.Input;
 using FitnessApp.ApiGateway.Models.Settings.Output;
-using FitnessApp.ApiGateway.Models.SignalR;
 using FitnessApp.ApiGateway.Models.UserProfile.Input;
 using FitnessApp.ApiGateway.Models.UserProfile.Output;
 using FitnessApp.ApiGateway.Services.Contacts;
 using FitnessApp.ApiGateway.Services.Exercises;
 using FitnessApp.ApiGateway.Services.Food;
+using FitnessApp.ApiGateway.Services.NotificationService;
 using FitnessApp.ApiGateway.Services.Settings;
-using FitnessApp.ApiGateway.Services.SignalR;
 using FitnessApp.ApiGateway.Services.UserProfile;
 using FitnessApp.Common.Paged.Extensions;
 using FitnessApp.Common.Paged.Models.Output;
+using FitnessApp.Common.ServiceBus.Nats.Events;
 
 namespace FitnessApp.ApiGateway.Services.Aggregator
 {
@@ -28,7 +29,7 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
         private readonly IUserProfileService _userProfileService;
         private readonly IFoodService _foodService;
         private readonly IExercisesService _exercisesService;
-        private readonly ISignalR _signalR;
+        private readonly INotificationService _notificationService;
 
         public AggregatorService(
             IContactsService contactsService,
@@ -36,14 +37,14 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
             IUserProfileService userProfileService,
             IFoodService foodService,
             IExercisesService exercisesService,
-            ISignalR signalR)
+            INotificationService notificationService)
         {
             _contactsService = contactsService;
             _settingsService = settingsService;
             _userProfileService = userProfileService;
             _foodService = foodService;
             _exercisesService = exercisesService;
-            _signalR = signalR;
+            _notificationService = notificationService;
         }
 
         #region Contacts
@@ -92,10 +93,10 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
             var result = await _contactsService.AcceptFollowRequest(model);
             if (result != null)
             {
-                await _signalR.SendMessage(new FollowRequestConfirmedModel
+                await _notificationService.SendMessage(new FollowRequestConfirmed
                 {
-                    Sender = model.UserId,
-                    Receiver = model.FollowerUserId
+                    UserId = model.UserId,
+                    FollowerUserId = model.FollowerUserId
                 });
             }
 
@@ -220,11 +221,16 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         #endregion
 
-        #region SignalR
+        #region Notification
 
-        public Task<string> GetToken()
+        public Task<string> GetNotificationTicket(NotificationTicketModel model)
         {
-            return _signalR.GetToken();
+            return _notificationService.GetNotificationTicket(model);
+        }
+
+        public Task<bool> ValidateNotificationTicket(ValidateNotificationTicketModel model)
+        {
+            return _notificationService.ValidateNotificationTicket(model);
         }
 
         #endregion

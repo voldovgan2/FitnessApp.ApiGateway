@@ -3,7 +3,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FitnessApp.ApiGateway.Configuration;
+using FitnessApp.ApiGateway.Exceptions;
 using FitnessApp.ApiGateway.Models.Internal;
+using FitnessApp.Common.Vault;
 using IdentityModel.Client;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
@@ -13,18 +15,21 @@ namespace FitnessApp.ApiGateway.Services.TokenClient
     public class TokenClient : ITokenClient
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly AuthenticationSettings _authenticationSettings;
+        private readonly ApiAuthenticationSettings _authenticationSettings;
         private readonly SemaphoreSlim _locker;
         private readonly IDistributedCache _distributedCache;
         private const double EXPIRATION_COEFITIENT = 0.8;
 
         public TokenClient(
             IHttpClientFactory httpClientFactory,
-            IOptions<AuthenticationSettings> authenticationSettings,
+            IOptions<ApiAuthenticationSettings> authenticationSettings,
+            IVaultService vaultService,
             IDistributedCache distributedCache)
         {
             _httpClientFactory = httpClientFactory;
             _authenticationSettings = authenticationSettings.Value;
+            _authenticationSettings.ClientSecret = vaultService.GetSecret("ApiAuthenticationSettings:domain_client_secret")
+                .GetAwaiter().GetResult();
             _distributedCache = distributedCache;
             _locker = new SemaphoreSlim(1, 1);
         }
@@ -66,16 +71,33 @@ namespace FitnessApp.ApiGateway.Services.TokenClient
         private async Task<TokenResponse> RequestAuthenticationToken(string scope)
         {
             var tokenHttpClient = _httpClientFactory.CreateClient("TokenClient");
-            var tokenRequest = new ClientCredentialsTokenRequest
+            var disco = await tokenHttpClient.GetDiscoveryDocumentAsync(
+                new DiscoveryDocumentRequest
+                {
+                    Address = _authenticationSettings.Address,
+                    Policy =
+                    {
+                        RequireHttps = false
+                    }
+                });
+            if (disco.IsError)
             {
-                Address = _authenticationSettings.Address,
-                ClientId = _authenticationSettings.ClientId,
-                ClientSecret = _authenticationSettings.ClientSecret,
-                Scope = scope
-            };
-            var tokenResponse = await tokenHttpClient.RequestClientCredentialsTokenAsync(tokenRequest);
-            var result = tokenResponse;
-            return result;
+                throw disco.Exception;
+            }
+            else
+            {
+                var tokenResponse = await tokenHttpClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+                {
+                    Address = disco.TokenEndpoint,
+                    ClientId = _authenticationSettings.ClientId,
+                    ClientSecret = _authenticationSettings.ClientSecret,
+                    Scope = scope
+                });
+                if (tokenResponse.IsError)
+                    throw new InternalUnAuthorizedException(tokenResponse.Error);
+
+                return tokenResponse;
+            }
         }
     }
 }

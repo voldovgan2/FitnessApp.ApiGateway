@@ -1,18 +1,23 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using Azure;
 using FitnessApp.ApiGateway.Contracts.Contacts.Input;
 using FitnessApp.ApiGateway.Contracts.Exercises.Input;
 using FitnessApp.ApiGateway.Contracts.Exercises.Output;
 using FitnessApp.ApiGateway.Contracts.Food.Input;
 using FitnessApp.ApiGateway.Contracts.Food.Output;
+using FitnessApp.ApiGateway.Contracts.Notification;
 using FitnessApp.ApiGateway.Contracts.Settings.Input;
 using FitnessApp.ApiGateway.Contracts.Settings.Output;
 using FitnessApp.ApiGateway.Contracts.UserProfile.Input;
 using FitnessApp.ApiGateway.Contracts.UserProfile.Output;
+using FitnessApp.ApiGateway.Exceptions;
 using FitnessApp.ApiGateway.Models.Contacts.Input;
 using FitnessApp.ApiGateway.Models.Exercises.Input;
 using FitnessApp.ApiGateway.Models.Food.Input;
+using FitnessApp.ApiGateway.Models.Notification;
 using FitnessApp.ApiGateway.Models.Settings.Input;
 using FitnessApp.ApiGateway.Models.UserProfile.Input;
 using FitnessApp.ApiGateway.Services.Aggregator;
@@ -57,7 +62,7 @@ namespace FitnessApp.ApiGateway.Controllers
         #region Test
 
         [HttpGet("Test")]
-        public async Task<IActionResult> Test()
+        public async Task Test()
         {
 #pragma warning disable S1075 // URIs should not be hardcoded
             var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, "http://localhost:7071/api/FollowRequestConfirmed");
@@ -83,13 +88,12 @@ namespace FitnessApp.ApiGateway.Controllers
 #pragma warning restore S1481 // Unused local variables should be removed
 
             // var response = await _aggregatorService.GetSettings("1");
-            return Ok("Test");
         }
 
         [HttpGet]
-        public Task<System.Collections.Generic.List<TodoItem>> GetTodoItems()
+        public Task<List<TodoItem>> GetTodoItems()
         {
-            return Task.FromResult(new System.Collections.Generic.List<TodoItem>
+            return Task.FromResult(new List<TodoItem>
             {
                 new TodoItem
                 {
@@ -115,21 +119,10 @@ namespace FitnessApp.ApiGateway.Controllers
 
         #endregion
 
-        #region Internal Token
-
-        [HttpGet("InternalToken")]
-        public async Task<ActionResult<string>> GetInternalToken()
-        {
-            var token = await _aggregatorService.GetToken();
-            return token;
-        }
-
-        #endregion
-
         #region Contacts
 
         [HttpGet("GetUserContacts")]
-        public async Task<IActionResult> GetUserContacts([FromQuery]GetUserContactsContract contract)
+        public async Task<PagedDataContract<UsersProfilesShortContract>> GetUserContacts([FromQuery]GetUserContactsContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<GetUserContactsModel>(contract);
@@ -140,122 +133,72 @@ namespace FitnessApp.ApiGateway.Controllers
             if (canViewUserContacts)
             {
                 var response = await _aggregatorService.GetUserContacts(model);
-                if (response != null)
-                {
-                    var result = _mapper.Map<PagedDataContract<UsersProfilesShortContract>>(response);
-                    return Ok(result);
-                }
-                else
-                {
-                    return StatusCode((int)HttpStatusCode.InternalServerError);
-                }
+                return _mapper.Map<PagedDataContract<UsersProfilesShortContract>>(response);
             }
             else
             {
-                return Forbid();
+                throw new ForbidenException("Access denied to this resource");
             }
         }
 
         [HttpPost("StartFollow")]
-        public async Task<IActionResult> StartFollow([FromBody] SendFollowContract contract)
+        public async Task<string> StartFollow([FromBody] SendFollowContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<SendFollowModel>(contract);
             model.UserId = userId;
             var result = await _aggregatorService.StartFollow(model);
-            if (result != null)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return result;
         }
 
         [HttpPost("AcceptFollowRequest")]
-        public async Task<IActionResult> AcceptFollowRequest([FromBody] ProcessFollowRequestContract contract)
+        public async Task<string> AcceptFollowRequest([FromBody] ProcessFollowRequestContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<ProcessFollowRequestModel>(contract);
             model.UserId = userId;
-            var updated = await _aggregatorService.AcceptFollowRequest(model);
-            if (updated != null)
-            {
-                return Ok(updated);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var result = await _aggregatorService.AcceptFollowRequest(model);
+            return result;
         }
 
         [HttpPost("RejectFollowRequest")]
-        public async Task<IActionResult> RejectFollowRequest([FromBody] ProcessFollowRequestContract contract)
+        public async Task<string> RejectFollowRequest([FromBody] ProcessFollowRequestContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<ProcessFollowRequestModel>(contract);
             model.UserId = userId;
-            var updated = await _aggregatorService.RejectFollowRequest(model);
-            if (updated != null)
-            {
-                return Ok(updated);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var result = await _aggregatorService.RejectFollowRequest(model);
+            return result;
         }
 
         [HttpPost("DeleteFollowRequest")]
-        public async Task<IActionResult> DeleteFollowRequest([FromBody] SendFollowContract contract)
+        public async Task<string> DeleteFollowRequest([FromBody] SendFollowContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<SendFollowModel>(contract);
             model.UserId = userId;
             var result = await _aggregatorService.DeleteFollowRequest(model);
-            if (result != null)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return result;
         }
 
         [HttpPost("DeleteFollower")]
-        public async Task<IActionResult> DeleteFollower([FromBody] ProcessFollowRequestContract contract)
+        public async Task<string> DeleteFollower([FromBody] ProcessFollowRequestContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<ProcessFollowRequestModel>(contract);
             model.UserId = userId;
-            var updated = await _aggregatorService.DeleteFollower(model);
-            if (updated != null)
-            {
-                return Ok(updated);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var result = await _aggregatorService.DeleteFollower(model);
+            return result;
         }
 
         [HttpPost("UnfollowUser")]
-        public async Task<IActionResult> UnfollowUser([FromBody] SendFollowContract contract)
+        public async Task<string> UnfollowUser([FromBody] SendFollowContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<SendFollowModel>(contract);
             model.UserId = userId;
-            var updated = await _aggregatorService.UnfollowUser(model);
-            if (updated != null)
-            {
-                return Ok(updated);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var result = await _aggregatorService.UnfollowUser(model);
+            return result;
         }
 
         #endregion
@@ -263,70 +206,41 @@ namespace FitnessApp.ApiGateway.Controllers
         #region Settings
 
         [HttpGet("GetSettings")]
-        public async Task<IActionResult> GetSettings()
+        public async Task<SettingsContract> GetSettings()
         {
-            var userId = _userIdProvider.GetUserId(User);
+            var userId = "test".Length == 0 ?
+                _userIdProvider.GetUserId(User)
+                : "savaTest";
             var response = await _aggregatorService.GetSettings(userId);
-            if (response != null)
-            {
-                var result = _mapper.Map<SettingsContract>(response);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return _mapper.Map<SettingsContract>(response);
         }
 
         [HttpPost("CreateSettings")]
-        public async Task<IActionResult> CreateSettings([FromBody]CreateSettingsContract contract)
+        public async Task<SettingsContract> CreateSettings([FromBody]CreateSettingsContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<CreateSettingsModel>(contract);
             model.UserId = userId;
-            var created = await _aggregatorService.CreateSettings(model);
-            if (created != null)
-            {
-                var result = _mapper.Map<SettingsContract>(created);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var response = await _aggregatorService.CreateSettings(model);
+            return _mapper.Map<SettingsContract>(response);
         }
 
         [HttpPut("UpdateSettings")]
-        public async Task<IActionResult> UpdateSettings([FromBody]UpdateSettingsContract contract)
+        public async Task<SettingsContract> UpdateSettings([FromBody]UpdateSettingsContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<UpdateSettingsModel>(contract);
             model.UserId = userId;
-            var updated = await _aggregatorService.UpdateSettings(model);
-            if (updated != null)
-            {
-                var result = _mapper.Map<SettingsContract>(updated);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var response = await _aggregatorService.UpdateSettings(model);
+            return _mapper.Map<SettingsContract>(response);
         }
 
         [HttpDelete("DeleteSettings")]
-        public async Task<IActionResult> DeleteSettings()
+        public async Task<string> DeleteSettings()
         {
             var userId = _userIdProvider.GetUserId(User);
-            var deleted = await _aggregatorService.DeleteSettings(userId);
-            if (deleted != null)
-            {
-                return Ok(deleted);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var response = await _aggregatorService.DeleteSettings(userId);
+            return response;
         }
 
         #endregion
@@ -334,89 +248,57 @@ namespace FitnessApp.ApiGateway.Controllers
         #region UserProfile
 
         [HttpGet("GetUserProfile")]
-        public async Task<IActionResult> GetUserProfile()
+        public async Task<UserProfileContract> GetUserProfile()
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var result = await GetUserProfileById(new GetUserProfileModel
+            var currentUserId = _userIdProvider.GetUserId(User);
+            return await GetUserProfileById(new GetUserProfileModel
             {
-                UserId = userId,
-                ContactsUserId = userId
+                UserId = currentUserId,
+                ContactsUserId = currentUserId
             });
-            return result;
         }
 
         [HttpGet("GetUserProfile/{userId}")]
-        public async Task<IActionResult> GetUserProfile([FromRoute] string userId)
+        public async Task<UserProfileContract> GetUserProfile([FromRoute] string userId)
         {
             var currentUserId = _userIdProvider.GetUserId(User);
-            var result = await GetUserProfileById(new GetUserProfileModel
+            return await GetUserProfileById(new GetUserProfileModel
             {
                 UserId = currentUserId,
                 ContactsUserId = userId
             });
-            return result;
         }
 
         [HttpPost("CreateUserProfile")]
-        public async Task<IActionResult> CreateUserProfile([FromBody]CreateUserProfileContract contract)
+        public async Task<UserProfileContract> CreateUserProfile([FromBody]CreateUserProfileContract contract)
         {
             var model = _mapper.Map<CreateUserProfileModel>(contract);
-            var created = await _aggregatorService.CreateUserProfile(model);
-            if (created != null)
-            {
-                var result = _mapper.Map<UserProfileContract>(created);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var response = await _aggregatorService.CreateUserProfile(model);
+            return _mapper.Map<UserProfileContract>(response);
         }
 
         [HttpPut("UpdateUserProfile")]
-        public async Task<IActionResult> UpdateUserProfile([FromBody]UpdateUserProfileContract contract)
+        public async Task<UserProfileContract> UpdateUserProfile([FromBody]UpdateUserProfileContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
+            var currentUserId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<UpdateUserProfileModel>(contract);
-            model.UserId = userId;
-            var updated = await _aggregatorService.UpdateUserProfile(model);
-            if (updated != null)
-            {
-                var result = _mapper.Map<UserProfileContract>(updated);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            model.UserId = currentUserId;
+            var response = await _aggregatorService.UpdateUserProfile(model);
+            return _mapper.Map<UserProfileContract>(response);
         }
 
-        [HttpDelete("DeleteUserProfile/{userId}")]
-        public async Task<IActionResult> DeleteUserProfile([FromRoute] string userId)
+        [HttpDelete("DeleteUserProfile")]
+        public async Task<string> DeleteUserProfile()
         {
-            var deleted = await _aggregatorService.DeleteUserProfile(userId);
-            if (deleted != null)
-            {
-                return Ok(deleted);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var currentUserId = _userIdProvider.GetUserId(User);
+            var response = await _aggregatorService.DeleteUserProfile(currentUserId);
+            return response;
         }
 
-        private async Task<IActionResult> GetUserProfileById(GetUserProfileModel model)
+        private async Task<UserProfileContract> GetUserProfileById(GetUserProfileModel model)
         {
             var response = await _aggregatorService.GetUserProfile(model);
-            if (response != null)
-            {
-                var result = _mapper.Map<UserProfileContract>(response);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return _mapper.Map<UserProfileContract>(response);
         }
 
         #endregion
@@ -424,72 +306,41 @@ namespace FitnessApp.ApiGateway.Controllers
         #region Food
 
         [HttpGet("GetFood")]
-        public async Task<IActionResult> GetFood([FromQuery] GetUserFoodsContract contract)
+        public async Task<UserFoodsContract> GetFood([FromQuery] GetUserFoodsContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<GetUserFoodsModel>(contract);
             model.UserId = userId;
             var response = await _aggregatorService.GetFoods(model);
-            if (response != null)
-            {
-                var result = _mapper.Map<UserFoodsContract>(response);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return _mapper.Map<UserFoodsContract>(response);
         }
 
         [HttpPut("AddFood")]
-        public async Task<IActionResult> AddFood([FromBody] AddUserFoodContract contract)
+        public async Task<FoodItemContract> AddFood([FromBody] AddUserFoodContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<AddUserFoodModel>(contract);
             model.UserId = userId;
             var response = await _aggregatorService.AddFood(model);
-            if (response != null)
-            {
-                var result = _mapper.Map<FoodItemContract>(response);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return _mapper.Map<FoodItemContract>(response);
         }
 
         [HttpPut("EditFood")]
-        public async Task<IActionResult> EditFood([FromBody] UpdateUserFoodContract contract)
+        public async Task<FoodItemContract> EditFood([FromBody] UpdateUserFoodContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<UpdateUserFoodModel>(contract);
             model.UserId = userId;
             var response = await _aggregatorService.EditFood(model);
-            if (response != null)
-            {
-                var result = _mapper.Map<FoodItemContract>(response);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return _mapper.Map<FoodItemContract>(response);
         }
 
         [HttpDelete("RemoveFood/{foodId}")]
-        public async Task<IActionResult> RemoveFood([FromRoute] string foodId)
+        public async Task<string> RemoveFood([FromRoute] string foodId)
         {
             var userId = _userIdProvider.GetUserId(User);
             var response = await _aggregatorService.RemoveFood(userId, foodId);
-            if (response != null)
-            {
-                return Ok(response);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return _mapper.Map<string>(response);
         }
 
         #endregion
@@ -497,72 +348,73 @@ namespace FitnessApp.ApiGateway.Controllers
         #region Exercises
 
         [HttpGet("GetExercises")]
-        public async Task<IActionResult> GetExercises([FromQuery] GetUserExercisesContract contract)
+        public async Task<UserExercisesContract> GetExercises([FromQuery] GetUserExercisesContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<GetUserExercisesModel>(contract);
             model.UserId = userId;
             var response = await _aggregatorService.GetExercises(model);
-            if (response != null)
-            {
-                var result = _mapper.Map<UserExercisesContract>(response);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return _mapper.Map<UserExercisesContract>(response);
         }
 
         [HttpPut("AddExercise")]
-        public async Task<IActionResult> AddExercise([FromBody] AddUserExerciseContract contract)
+        public async Task<ExerciseItemContract> AddExercise([FromBody] AddUserExerciseContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<AddUserExerciseModel>(contract);
             model.UserId = userId;
             var response = await _aggregatorService.AddExercise(model);
-            if (response != null)
-            {
-                var result = _mapper.Map<ExerciseItemContract>(response);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return _mapper.Map<ExerciseItemContract>(response);
         }
 
         [HttpPut("EditExercise")]
-        public async Task<IActionResult> EditExercise([FromBody] UpdateUserExerciseContract contract)
+        public async Task<ExerciseItemContract> EditExercise([FromBody] UpdateUserExerciseContract contract)
         {
             var userId = _userIdProvider.GetUserId(User);
             var model = _mapper.Map<UpdateUserExerciseModel>(contract);
             model.UserId = userId;
             var response = await _aggregatorService.EditExercise(model);
-            if (response != null)
-            {
-                var result = _mapper.Map<ExerciseItemContract>(response);
-                return Ok(result);
-            }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            return _mapper.Map<ExerciseItemContract>(response);
         }
 
         [HttpDelete("RemoveExercise/{exerciseId}")]
-        public async Task<IActionResult> RemoveExercise([FromRoute] string exerciseId)
+        public async Task<string> RemoveExercise([FromRoute] string exerciseId)
         {
             var userId = _userIdProvider.GetUserId(User);
             var response = await _aggregatorService.RemoveExercise(userId, exerciseId);
-            if (response != null)
+            return response;
+        }
+
+        #endregion
+
+        #region Notification
+
+        [HttpGet("GetNotificationTicket")]
+        public Task<string> GetNotificationTicket()
+        {
+            var model = new NotificationTicketModel
             {
-                return Ok(response);
-            }
-            else
+                Ip = GetRequestIp(),
+                UserId = _userIdProvider.GetUserId(User),
+            };
+            return _aggregatorService.GetNotificationTicket(model);
+        }
+
+        [HttpGet("ValidateNotificationTicket")]
+        public Task<bool> ValidateNotificationTicket([FromQuery] string ticket)
+        {
+            var model = new ValidateNotificationTicketModel
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+                Ticket = ticket,
+                Ip = GetRequestIp(),
+                UserId = _userIdProvider.GetUserId(User)
+            };
+            return _aggregatorService.ValidateNotificationTicket(model);
+        }
+
+        private string GetRequestIp()
+        {
+            return Request.HttpContext.Connection.RemoteIpAddress.ToString();
         }
 
         #endregion

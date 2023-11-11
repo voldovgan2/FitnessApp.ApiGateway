@@ -1,23 +1,27 @@
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using AutoMapper;
 using FitnessApp.ApiGateway;
 using FitnessApp.ApiGateway.Configuration;
 using FitnessApp.ApiGateway.Extensions;
+using FitnessApp.ApiGateway.Middleware;
 using FitnessApp.ApiGateway.Services.Aggregator;
 using FitnessApp.ApiGateway.Services.InternalClient;
 using FitnessApp.ApiGateway.Services.TokenClient;
 using FitnessApp.ApiGateway.Services.UserIdProvider;
+using FitnessApp.Common.Configuration.Serilog;
 using FitnessApp.Common.Configuration.Swagger;
+using FitnessApp.Common.Configuration.Vault;
+using FitnessApp.Common.Middleware;
 using FitnessApp.Common.Serializer.JsonSerializer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,8 +42,9 @@ var mapperConfig = new MapperConfiguration(mc =>
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
-var authenticationSettings = builder.Configuration.GetSection("AuthenticationSettings");
-builder.Services.Configure<AuthenticationSettings>(authenticationSettings);
+var apiAuthenticationSettings = builder.Configuration.GetSection("ApiAuthenticationSettings");
+
+builder.Services.Configure<ApiAuthenticationSettings>(apiAuthenticationSettings);
 
 builder.Services.AddTransient<ITokenClient, TokenClient>();
 
@@ -57,7 +62,9 @@ builder.Services.AddFoodService(builder.Configuration);
 
 builder.Services.AddExercisesService(builder.Configuration);
 
-builder.Services.AddSignalRService(builder.Configuration);
+builder.Services.AddNotificationService(builder.Configuration);
+
+builder.Services.AddVaultClient(builder.Configuration);
 
 builder.Services.AddTransient<IAggregatorService, AggregatorService>();
 
@@ -83,21 +90,34 @@ builder.Services.AddHttpClient("InternalClient", client =>
 #pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(
-        options =>
+    .AddAuthentication(opts =>
     {
-        builder.Configuration.Bind("AzureAdB2C", options);
-        options.TokenValidationParameters.NameClaimType = "name";
-    },
-        options =>
-        {
-            builder.Configuration.Bind("AzureAdB2C", options);
-        });
+        opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        opts.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(cfg =>
+     {
+         cfg.RequireHttpsMetadata = false;
+         cfg.Authority = builder.Configuration["ClientAuthenticationSettings:Issuer"];
+         cfg.TokenValidationParameters.ValidAudiences = builder.Configuration["ClientAuthenticationSettings:Audience"].Split(" ");
+         cfg.Events = new JwtBearerEvents
+         {
+             OnAuthenticationFailed = context =>
+             {
+                 if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                 {
+                     context.Response.Headers.Add("Token-Expired", "true");
+                 }
+
+                 return Task.CompletedTask;
+             }
+         };
+     });
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("Authenticated", policy => policy.RequireClaim(ClaimTypes.NameIdentifier));
+    options.AddPolicy(builder.Configuration["ClientAuthenticationSettings:Policy"], policy => policy.RequireClaim(ClaimTypes.NameIdentifier));
 });
 
 builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
@@ -109,12 +129,17 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
 
 builder.Services.ConfigureSwaggerConfiguration(Assembly.GetExecutingAssembly().GetName().Name);
 
+builder.ConfigureLogging();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Swagger XML Api Demo v1");
+    });
 }
 else
 {
@@ -125,11 +150,14 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
+app.UseMiddleware<ErrorHandlerMiddleware>();
+
+app.UseMiddleware<CorrelationIdHeaderMiddleware>();
+
+app.MapControllers();
+
 app.UseCors("AllowAll");
 
-app.UseSwagger();
+app.Run();
 
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Swagger XML Api Demo v1");
-});
+public partial class Program { }

@@ -4,6 +4,7 @@ using FitnessApp.ApiGateway.Models.Exercises.Input;
 using FitnessApp.ApiGateway.Models.Exercises.Output;
 using FitnessApp.ApiGateway.Models.Food.Input;
 using FitnessApp.ApiGateway.Models.Food.Output;
+using FitnessApp.ApiGateway.Models.Notification;
 using FitnessApp.ApiGateway.Models.Settings.Input;
 using FitnessApp.ApiGateway.Models.Settings.Output;
 using FitnessApp.ApiGateway.Models.UserProfile.Input;
@@ -63,9 +64,11 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         #endregion
 
-        #region SignalR
+        #region NotificationService
 
-        Task<string> GetToken();
+        Task<string> GetNotificationTicket(NotificationTicketModel model);
+
+        Task<bool> ValidateNotificationTicket(ValidateNotificationTicketModel model);
 
         #endregion
     }
