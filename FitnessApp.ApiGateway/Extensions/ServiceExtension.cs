@@ -82,7 +82,7 @@ namespace FitnessApp.ApiGateway.Extensions
             return services;
         }
 
-        public static IServiceCollection AddNotificationService(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddNotificationService(this IServiceCollection services)
         {
             services.AddTransient<INotificationService, NotificationService>(
                 sp =>

@@ -11,17 +11,20 @@ using FitnessApp.ApiGateway.Services.Aggregator;
 using FitnessApp.ApiGateway.Services.InternalClient;
 using FitnessApp.ApiGateway.Services.TokenClient;
 using FitnessApp.ApiGateway.Services.UserIdProvider;
+using FitnessApp.Common.Configuration.Nats;
 using FitnessApp.Common.Configuration.Serilog;
 using FitnessApp.Common.Configuration.Swagger;
 using FitnessApp.Common.Configuration.Vault;
 using FitnessApp.Common.Middleware;
 using FitnessApp.Common.Serializer.JsonSerializer;
+using FitnessApp.Common.ServiceBus.Nats.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using NATS.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,14 +46,20 @@ IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
 var apiAuthenticationSettings = builder.Configuration.GetSection("ApiAuthenticationSettings");
-
 builder.Services.Configure<ApiAuthenticationSettings>(apiAuthenticationSettings);
+
+var serviceBusSettings = builder.Configuration.GetSection("ServiceBus");
+builder.Services.Configure<ServiceBusSettings>(serviceBusSettings);
 
 builder.Services.AddTransient<ITokenClient, TokenClient>();
 
 builder.Services.AddTransient<IInternalClient, InternalClient>();
 
 builder.Services.AddTransient<IUserIdProvider, UserIdProvider>();
+
+builder.Services.AddTransient<IConnectionFactory, ConnectionFactory>();
+
+builder.Services.AddTransient<IServiceBus, ServiceBus>();
 
 builder.Services.AddSettingsService(builder.Configuration);
 
@@ -62,7 +71,7 @@ builder.Services.AddFoodService(builder.Configuration);
 
 builder.Services.AddExercisesService(builder.Configuration);
 
-builder.Services.AddNotificationService(builder.Configuration);
+builder.Services.AddNotificationService();
 
 builder.Services.AddVaultClient(builder.Configuration);
 

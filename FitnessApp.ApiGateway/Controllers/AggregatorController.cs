@@ -1,14 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
-using Azure;
 using FitnessApp.ApiGateway.Contracts.Contacts.Input;
 using FitnessApp.ApiGateway.Contracts.Exercises.Input;
 using FitnessApp.ApiGateway.Contracts.Exercises.Output;
 using FitnessApp.ApiGateway.Contracts.Food.Input;
 using FitnessApp.ApiGateway.Contracts.Food.Output;
-using FitnessApp.ApiGateway.Contracts.Notification;
 using FitnessApp.ApiGateway.Contracts.Settings.Input;
 using FitnessApp.ApiGateway.Contracts.Settings.Output;
 using FitnessApp.ApiGateway.Contracts.UserProfile.Input;
