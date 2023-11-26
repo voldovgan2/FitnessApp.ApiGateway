@@ -41,7 +41,8 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build and push
+    - name: Build and push develop
+      if: !${{ github.ref == 'refs/heads/main' }}
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -50,3 +51,14 @@ jobs:
           NUGET_PAT=${{ secrets.PACKAGE_SOURCE_PASSWORD }}
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/fitness-app-gateway-api:${{ steps.gitversion.outputs.SemVer }}
+        
+    - name: Build and push latest
+      if: ${{ github.ref == 'refs/heads/main' }}
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile  
+        build-args: |
+          NUGET_PAT=${{ secrets.PACKAGE_SOURCE_PASSWORD }}
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/fitness-app-gateway-api:latest
