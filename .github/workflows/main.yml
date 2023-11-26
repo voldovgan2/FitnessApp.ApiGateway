@@ -49,4 +49,4 @@ jobs:
         build-args: |
           NUGET_PAT=${{ secrets.PACKAGE_SOURCE_PASSWORD }}
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fitness-app-gateway-api:${{ steps.gitversion.outputs.SemVer }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fitness-app-gateway-api:latest
