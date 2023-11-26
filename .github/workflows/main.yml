@@ -42,7 +42,7 @@ jobs:
       uses: docker/setup-buildx-action@v3
 
     - name: Build and push develop
-      if: !${{ github.ref == 'refs/heads/main' }}
+      if: !github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -53,7 +53,7 @@ jobs:
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/fitness-app-gateway-api:${{ steps.gitversion.outputs.SemVer }}
         
     - name: Build and push latest
-      if: ${{ github.ref == 'refs/heads/main' }}
+      if: github.ref == 'refs/heads/master'
       uses: docker/build-push-action@v5
       with:
         context: .
