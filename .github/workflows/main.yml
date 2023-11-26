@@ -2,9 +2,7 @@ name: Build FitnessApp.GatewayApi image
 
 on:
   push:
-    branches:
-    - master
-    - develop
+    branches:[master]
       
 jobs:
   build:
