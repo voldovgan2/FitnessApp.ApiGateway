@@ -1,9 +1,2 @@
 mode: Mainline 
-next-version: 1.0.0 
-branches:
-  develop:
-    tag: develop
-  master:
-    tag: latest 
-ignore:
-  sha: []
+next-version: 1.0.0
