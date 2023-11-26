@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 #fetch-depth is needed for GitVersion
         
       #Install and calculate the new version with GitVersion  
       - name: Install GitVersion
