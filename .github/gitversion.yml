@@ -2,8 +2,8 @@ mode: Mainline
 next-version: 1.0.0 
 branches:
   develop:
-    tag: {BranchName}
+    tag: develop
   master:
-    tag: 'latest' 
+    tag: latest 
 ignore:
   sha: []
