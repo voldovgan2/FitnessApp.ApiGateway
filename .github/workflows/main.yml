@@ -19,7 +19,7 @@ jobs:
       with:
         fetch-depth: 0 #fetch-depth is needed for GitVersion
         
-      #Install and calculate the new version with GitVersion  
+     #Install and calculate the new version with GitVersion  
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.7
       with:
