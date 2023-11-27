@@ -16,21 +16,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-      with:
-        fetch-depth: 0 #fetch-depth is needed for GitVersion
-        
-    #Install and calculate the new version with GitVersion  
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.7
-      with:
-        versionSpec: 5.x
-        
-    - name: Determine Version
-      uses: gittools/actions/gitversion/execute@v0.9.7
-      id: gitversion # step id used as reference for output values
-      with:
-        useConfigFile: true
-        configFilePath: ./.github/gitversion.yml 
         
     - name: Login to Docker Hub
       uses: docker/login-action@v3
@@ -50,7 +35,7 @@ jobs:
         build-args: |
           NUGET_PAT=${{ secrets.PACKAGE_SOURCE_PASSWORD }}
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/fitness-app-gateway-api:${{ steps.gitversion.outputs.SemVer }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/fitness-app-gateway-api:alpha
         
     - name: Build and push latest
       if: github.ref == 'refs/heads/master'
