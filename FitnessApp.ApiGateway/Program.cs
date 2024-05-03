@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AutoMapper;
 using FitnessApp.ApiGateway;
 using FitnessApp.ApiGateway.Configuration;
 using FitnessApp.ApiGateway.Extensions;
@@ -32,13 +31,7 @@ builder.Services.AddDistributedRedisCache(option =>
 });
 
 builder.Services.AddTransient<IJsonSerializer, JsonSerializer>();
-
-var mapperConfig = new MapperConfiguration(mc =>
-{
-    mc.AddProfile(new MappingProfile());
-});
-IMapper mapper = mapperConfig.CreateMapper();
-builder.Services.AddSingleton(mapper);
+builder.Services.ConfigureMapper(new MappingProfile());
 
 var apiAuthenticationSettings = builder.Configuration.GetSection("ApiAuthenticationSettings");
 builder.Services.Configure<ApiAuthenticationSettings>(apiAuthenticationSettings);
