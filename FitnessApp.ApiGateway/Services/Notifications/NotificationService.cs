@@ -10,28 +10,17 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace FitnessApp.ApiGateway.Services.NotificationService
 {
-    public class NotificationService : INotificationService
+    public class NotificationService(
+        IServiceBus serviceBus,
+        IDistributedCache distributedCache,
+        IJsonSerializer serializer) : INotificationService
     {
         private const int KEY_EXPIRES_SECONDS = 5;
-
-        private readonly IServiceBus _serviceBus;
-        private readonly IDistributedCache _distributedCache;
-        private readonly IJsonSerializer _serializer;
-
-        public NotificationService(
-            IServiceBus serviceBus,
-            IDistributedCache distributedCache,
-            IJsonSerializer serializer)
-        {
-            _serviceBus = serviceBus;
-            _distributedCache = distributedCache;
-            _serializer = serializer;
-        }
 
         public async Task<string> GetNotificationTicket(NotificationTicketModel model)
         {
             var ticket = CreateTicket(model);
-            await _distributedCache.SetStringAsync(
+            await distributedCache.SetStringAsync(
                 ticket,
                 DateTime.UtcNow.AddSeconds(KEY_EXPIRES_SECONDS).Ticks.ToString(),
                 new DistributedCacheEntryOptions
@@ -43,13 +32,13 @@ namespace FitnessApp.ApiGateway.Services.NotificationService
 
         public Task SendMessage(FollowRequestConfirmed model)
         {
-            _serviceBus.PublishEvent(Topic.FOLLOW_REQUEST_CONFIRMED, _serializer.SerializeToBytes(model));
+            serviceBus.PublishEvent(Topic.FOLLOW_REQUEST_CONFIRMED, serializer.SerializeToBytes(model));
             return Task.CompletedTask;
         }
 
         public async Task<bool> ValidateNotificationTicket(ValidateNotificationTicketModel model)
         {
-            var expirationDateCached = await _distributedCache.GetStringAsync(model.Ticket);
+            var expirationDateCached = await distributedCache.GetStringAsync(model.Ticket);
             if (expirationDateCached == null)
                 return false;
 

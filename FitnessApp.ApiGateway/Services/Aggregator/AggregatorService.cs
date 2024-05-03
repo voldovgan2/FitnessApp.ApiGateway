@@ -22,54 +22,37 @@ using FitnessApp.Common.ServiceBus.Nats.Events;
 
 namespace FitnessApp.ApiGateway.Services.Aggregator
 {
-    public class AggregatorService : IAggregatorService
+    public class AggregatorService(
+        IContactsService contactsService,
+        ISettingsService settingsService,
+        IUserProfileService userProfileService,
+        IFoodService foodService,
+        IExercisesService exercisesService,
+        INotificationService notificationService) : IAggregatorService
     {
-        private readonly IContactsService _contactsService;
-        private readonly ISettingsService _settingsService;
-        private readonly IUserProfileService _userProfileService;
-        private readonly IFoodService _foodService;
-        private readonly IExercisesService _exercisesService;
-        private readonly INotificationService _notificationService;
-
-        public AggregatorService(
-            IContactsService contactsService,
-            ISettingsService settingsService,
-            IUserProfileService userProfileService,
-            IFoodService foodService,
-            IExercisesService exercisesService,
-            INotificationService notificationService)
-        {
-            _contactsService = contactsService;
-            _settingsService = settingsService;
-            _userProfileService = userProfileService;
-            _foodService = foodService;
-            _exercisesService = exercisesService;
-            _notificationService = notificationService;
-        }
-
         #region Contacts
 
         public Task<bool> CanViewUserContacts(GetUserContactsModel model)
         {
-            return _contactsService.CanViewUserContacts(model);
+            return contactsService.CanViewUserContacts(model);
         }
 
         public async Task<PagedDataModel<UserProfileModel>> GetUserContacts(GetUserContactsModel model)
         {
             PagedDataModel<UserProfileModel> result = null;
-            var contacts = await _contactsService.GetUserContacts(model);
+            var contacts = await contactsService.GetUserContacts(model);
             if (contacts != null)
             {
                 var getSelectedUsersProfilesModel = new GetSelectedUsersProfilesModel
                 {
                     UsersIds = contacts.Select(i => i.UserId)
                 };
-                var profiles = await _userProfileService.GetUsersProfiles(getSelectedUsersProfilesModel);
+                var profiles = await userProfileService.GetUsersProfiles(getSelectedUsersProfilesModel);
                 if (profiles != null)
                 {
                     foreach (var item in profiles)
                     {
-                        item.CanFollow = !await _contactsService.IsFollower(new GetUserContactsModel
+                        item.CanFollow = !await contactsService.IsFollower(new GetUserContactsModel
                         {
                             UserId = model.UserId,
                             ContactsUserId = item.UserId
@@ -85,15 +68,15 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public Task<string> StartFollow(SendFollowModel model)
         {
-            return _contactsService.StartFollow(model);
+            return contactsService.StartFollow(model);
         }
 
         public async Task<string> AcceptFollowRequest(ProcessFollowRequestModel model)
         {
-            var result = await _contactsService.AcceptFollowRequest(model);
+            var result = await contactsService.AcceptFollowRequest(model);
             if (result != null)
             {
-                await _notificationService.SendMessage(new FollowRequestConfirmed
+                await notificationService.SendMessage(new FollowRequestConfirmed
                 {
                     UserId = model.UserId,
                     FollowerUserId = model.FollowerUserId
@@ -105,22 +88,22 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public Task<string> RejectFollowRequest(ProcessFollowRequestModel model)
         {
-            return _contactsService.RejectFollowRequest(model);
+            return contactsService.RejectFollowRequest(model);
         }
 
         public Task<string> DeleteFollowRequest(SendFollowModel model)
         {
-            return _contactsService.DeleteFollowRequest(model);
+            return contactsService.DeleteFollowRequest(model);
         }
 
         public Task<string> DeleteFollower(ProcessFollowRequestModel model)
         {
-            return _contactsService.DeleteFollower(model);
+            return contactsService.DeleteFollower(model);
         }
 
         public Task<string> UnfollowUser(SendFollowModel model)
         {
-            return _contactsService.UnfollowUser(model);
+            return contactsService.UnfollowUser(model);
         }
 
         #endregion
@@ -129,22 +112,22 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public Task<SettingsModel> GetSettings(string userId)
         {
-            return _settingsService.GetSettings(userId);
+            return settingsService.GetSettings(userId);
         }
 
         public Task<SettingsModel> CreateSettings(CreateSettingsModel model)
         {
-            return _settingsService.CreateSettings(model);
+            return settingsService.CreateSettings(model);
         }
 
         public Task<SettingsModel> UpdateSettings(UpdateSettingsModel model)
         {
-            return _settingsService.UpdateSettings(model);
+            return settingsService.UpdateSettings(model);
         }
 
         public Task<string> DeleteSettings(string userId)
         {
-            return _settingsService.DeleteSettings(userId);
+            return settingsService.DeleteSettings(userId);
         }
 
         #endregion
@@ -153,22 +136,22 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public Task<UserProfileModel> GetUserProfile(GetUserProfileModel model)
         {
-            return _userProfileService.GetUserProfile(model.ContactsUserId);
+            return userProfileService.GetUserProfile(model.ContactsUserId);
         }
 
         public Task<UserProfileModel> CreateUserProfile(CreateUserProfileModel model)
         {
-            return _userProfileService.CreateUserProfile(model);
+            return userProfileService.CreateUserProfile(model);
         }
 
         public Task<UserProfileModel> UpdateUserProfile(UpdateUserProfileModel model)
         {
-            return _userProfileService.UpdateUserProfile(model);
+            return userProfileService.UpdateUserProfile(model);
         }
 
         public Task<string> DeleteUserProfile(string userId)
         {
-            return _userProfileService.DeleteUserProfile(userId);
+            return userProfileService.DeleteUserProfile(userId);
         }
 
         #endregion
@@ -177,22 +160,22 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public Task<UserFoodsModel> GetFoods(GetUserFoodsModel model)
         {
-            return _foodService.GetFoods(model);
+            return foodService.GetFoods(model);
         }
 
         public async Task<FoodItemModel> AddFood(AddUserFoodModel model)
         {
-            return await _foodService.AddFood(model);
+            return await foodService.AddFood(model);
         }
 
         public async Task<FoodItemModel> EditFood(UpdateUserFoodModel model)
         {
-            return await _foodService.EditFood(model);
+            return await foodService.EditFood(model);
         }
 
         public async Task<string> RemoveFood(string userId, string foodId)
         {
-            return await _foodService.RemoveFood(userId, foodId);
+            return await foodService.RemoveFood(userId, foodId);
         }
 
         #endregion
@@ -201,22 +184,22 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public async Task<UserExercisesModel> GetExercises(GetUserExercisesModel model)
         {
-            return await _exercisesService.GetExercises(model);
+            return await exercisesService.GetExercises(model);
         }
 
         public async Task<ExerciseItemModel> AddExercise(AddUserExerciseModel model)
         {
-            return await _exercisesService.AddExercise(model);
+            return await exercisesService.AddExercise(model);
         }
 
         public async Task<ExerciseItemModel> EditExercise(UpdateUserExerciseModel model)
         {
-            return await _exercisesService.EditExercise(model);
+            return await exercisesService.EditExercise(model);
         }
 
         public async Task<string> RemoveExercise(string userId, string exerciseId)
         {
-            return await _exercisesService.RemoveExercise(userId, exerciseId);
+            return await exercisesService.RemoveExercise(userId, exerciseId);
         }
 
         #endregion
@@ -225,12 +208,12 @@ namespace FitnessApp.ApiGateway.Services.Aggregator
 
         public Task<string> GetNotificationTicket(NotificationTicketModel model)
         {
-            return _notificationService.GetNotificationTicket(model);
+            return notificationService.GetNotificationTicket(model);
         }
 
         public Task<bool> ValidateNotificationTicket(ValidateNotificationTicketModel model)
         {
-            return _notificationService.ValidateNotificationTicket(model);
+            return notificationService.ValidateNotificationTicket(model);
         }
 
         #endregion

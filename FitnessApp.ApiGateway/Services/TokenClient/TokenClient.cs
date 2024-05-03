@@ -28,8 +28,10 @@ namespace FitnessApp.ApiGateway.Services.TokenClient
         {
             _httpClientFactory = httpClientFactory;
             _authenticationSettings = authenticationSettings.Value;
-            _authenticationSettings.ClientSecret = vaultService.GetSecret("ApiAuthenticationSettings:ClientSecret")
-                .GetAwaiter().GetResult();
+            _authenticationSettings.ClientSecret = vaultService
+                .GetSecret("ApiAuthenticationSettings:ClientSecret")
+                .GetAwaiter()
+                .GetResult();
             _distributedCache = distributedCache;
             _locker = new SemaphoreSlim(1, 1);
         }

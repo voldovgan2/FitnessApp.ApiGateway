@@ -29,7 +29,7 @@ namespace FitnessApp.ApiGateway.Extensions
         {
             StringBuilder result = new StringBuilder(url);
             var propertiesInfo = model.GetType().GetProperties();
-            if (propertiesInfo.Any())
+            if (propertiesInfo.Length != 0)
             {
                 result.Append('?');
                 bool isFirstParameter = true;

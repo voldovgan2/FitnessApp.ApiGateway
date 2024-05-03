@@ -11,26 +11,21 @@ using FitnessApp.ApiGateway.Services.Aggregator;
 using FitnessApp.ApiGateway.Services.InternalClient;
 using FitnessApp.ApiGateway.Services.TokenClient;
 using FitnessApp.ApiGateway.Services.UserIdProvider;
-using FitnessApp.Common.Configuration.Nats;
-using FitnessApp.Common.Configuration.Serilog;
-using FitnessApp.Common.Configuration.Swagger;
-using FitnessApp.Common.Configuration.Vault;
+using FitnessApp.Common.Configuration;
 using FitnessApp.Common.Middleware;
 using FitnessApp.Common.Serializer.JsonSerializer;
-using FitnessApp.Common.ServiceBus.Nats.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using NATS.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddDistributedRedisCache(option =>
 {
     option.Configuration = builder.Configuration["Redis:Configuration"];
@@ -48,18 +43,13 @@ builder.Services.AddSingleton(mapper);
 var apiAuthenticationSettings = builder.Configuration.GetSection("ApiAuthenticationSettings");
 builder.Services.Configure<ApiAuthenticationSettings>(apiAuthenticationSettings);
 
-var serviceBusSettings = builder.Configuration.GetSection("ServiceBus");
-builder.Services.Configure<ServiceBusSettings>(serviceBusSettings);
+builder.Services.ConfigureNats(builder.Configuration);
 
 builder.Services.AddTransient<ITokenClient, TokenClient>();
 
 builder.Services.AddTransient<IInternalClient, InternalClient>();
 
 builder.Services.AddTransient<IUserIdProvider, UserIdProvider>();
-
-builder.Services.AddTransient<IConnectionFactory, ConnectionFactory>();
-
-builder.Services.AddTransient<IServiceBus, ServiceBus>();
 
 builder.Services.AddSettingsService(builder.Configuration);
 
@@ -73,7 +63,7 @@ builder.Services.AddExercisesService(builder.Configuration);
 
 builder.Services.AddNotificationService();
 
-builder.Services.AddVaultClient(builder.Configuration);
+builder.Services.ConfigureVault(builder.Configuration);
 
 builder.Services.AddTransient<IAggregatorService, AggregatorService>();
 
@@ -116,7 +106,7 @@ builder.Services
              {
                  if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                  {
-                     context.Response.Headers.Add("Token-Expired", "true");
+                     context.Response.Headers.Append("Token-Expired", "true");
                  }
 
                  return Task.CompletedTask;
@@ -136,7 +126,7 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
            .AllowAnyHeader();
 }));
 
-builder.Services.ConfigureSwaggerConfiguration(Assembly.GetExecutingAssembly().GetName().Name);
+builder.Services.ConfigureSwagger(Assembly.GetExecutingAssembly().GetName().Name);
 
 builder.ConfigureLogging();
 
@@ -144,11 +134,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Swagger XML Api Demo v1");
-    });
+    app.UseSwaggerAndUi();
 }
 else
 {
@@ -156,15 +142,10 @@ else
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
-
 app.UseMiddleware<ErrorHandlerMiddleware>();
-
 app.UseMiddleware<CorrelationIdHeaderMiddleware>();
-
 app.MapControllers();
-
 app.UseCors("AllowAll");
 
 app.Run();

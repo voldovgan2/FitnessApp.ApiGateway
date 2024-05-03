@@ -2,7 +2,5 @@
 
 namespace FitnessApp.ApiGateway.Contracts.Exercises.Input
 {
-    public class GetUserExercisesContract : GetPagedDataContract
-    {
-    }
+    public class GetUserExercisesContract : GetPagedDataContract;
 }

@@ -1,10 +1,10 @@
 ﻿using System;
 using FitnessApp.ApiGateway.Enums.UserProfile;
-using FitnessApp.ApiGateway.Models.Blob.Output;
+using FitnessApp.ApiGateway.Models.File.Output;
 
 namespace FitnessApp.ApiGateway.Models.UserProfile.Output
 {
-    public class UserProfileModel : IBlobModel
+    public class UserProfileModel : IFileModel
     {
         public int FollowersCount { get; set; }
         public int FollowingsCount { get; set; }

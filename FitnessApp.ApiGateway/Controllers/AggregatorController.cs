@@ -34,27 +34,11 @@ namespace FitnessApp.ApiGateway.Controllers
 
     // [Authorize("Authenticated")]
     // [RequiredScope(ScopeRequiredByApi)]
-    public class AggregatorController : Controller
+    public class AggregatorController(IUserIdProvider userIdProvider, IAggregatorService aggregatorService, IMapper mapper) : Controller
     {
 #pragma warning disable S1144 // Unused private types or members should be removed
         private const string ScopeRequiredByApi = "User.Read";
 #pragma warning restore S1144 // Unused private types or members should be removed
-
-        private readonly IUserIdProvider _userIdProvider;
-        private readonly IAggregatorService _aggregatorService;
-        private readonly IMapper _mapper;
-
-        public AggregatorController(
-            IUserIdProvider userIdProvider,
-            IAggregatorService aggregatorService,
-
-            IMapper mapper
-        )
-        {
-            _userIdProvider = userIdProvider;
-            _aggregatorService = aggregatorService;
-            _mapper = mapper;
-        }
 
         #region Test
 
@@ -92,7 +76,7 @@ namespace FitnessApp.ApiGateway.Controllers
         {
             return Task.FromResult(new List<TodoItem>
             {
-                new TodoItem
+                new()
                 {
                     Id = 1,
                     Description = "Description",
@@ -121,16 +105,16 @@ namespace FitnessApp.ApiGateway.Controllers
         [HttpGet("GetUserContacts")]
         public async Task<PagedDataContract<UsersProfilesShortContract>> GetUserContacts([FromQuery]GetUserContactsContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<GetUserContactsModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<GetUserContactsModel>(contract);
             model.UserId = userId;
             model.ContactsUserId ??= userId;
 
-            var canViewUserContacts = await _aggregatorService.CanViewUserContacts(model);
+            var canViewUserContacts = await aggregatorService.CanViewUserContacts(model);
             if (canViewUserContacts)
             {
-                var response = await _aggregatorService.GetUserContacts(model);
-                return _mapper.Map<PagedDataContract<UsersProfilesShortContract>>(response);
+                var response = await aggregatorService.GetUserContacts(model);
+                return mapper.Map<PagedDataContract<UsersProfilesShortContract>>(response);
             }
             else
             {
@@ -141,60 +125,60 @@ namespace FitnessApp.ApiGateway.Controllers
         [HttpPost("StartFollow")]
         public async Task<string> StartFollow([FromBody] SendFollowContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<SendFollowModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<SendFollowModel>(contract);
             model.UserId = userId;
-            var result = await _aggregatorService.StartFollow(model);
+            var result = await aggregatorService.StartFollow(model);
             return result;
         }
 
         [HttpPost("AcceptFollowRequest")]
         public async Task<string> AcceptFollowRequest([FromBody] ProcessFollowRequestContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<ProcessFollowRequestModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<ProcessFollowRequestModel>(contract);
             model.UserId = userId;
-            var result = await _aggregatorService.AcceptFollowRequest(model);
+            var result = await aggregatorService.AcceptFollowRequest(model);
             return result;
         }
 
         [HttpPost("RejectFollowRequest")]
         public async Task<string> RejectFollowRequest([FromBody] ProcessFollowRequestContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<ProcessFollowRequestModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<ProcessFollowRequestModel>(contract);
             model.UserId = userId;
-            var result = await _aggregatorService.RejectFollowRequest(model);
+            var result = await aggregatorService.RejectFollowRequest(model);
             return result;
         }
 
         [HttpPost("DeleteFollowRequest")]
         public async Task<string> DeleteFollowRequest([FromBody] SendFollowContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<SendFollowModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<SendFollowModel>(contract);
             model.UserId = userId;
-            var result = await _aggregatorService.DeleteFollowRequest(model);
+            var result = await aggregatorService.DeleteFollowRequest(model);
             return result;
         }
 
         [HttpPost("DeleteFollower")]
         public async Task<string> DeleteFollower([FromBody] ProcessFollowRequestContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<ProcessFollowRequestModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<ProcessFollowRequestModel>(contract);
             model.UserId = userId;
-            var result = await _aggregatorService.DeleteFollower(model);
+            var result = await aggregatorService.DeleteFollower(model);
             return result;
         }
 
         [HttpPost("UnfollowUser")]
         public async Task<string> UnfollowUser([FromBody] SendFollowContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<SendFollowModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<SendFollowModel>(contract);
             model.UserId = userId;
-            var result = await _aggregatorService.UnfollowUser(model);
+            var result = await aggregatorService.UnfollowUser(model);
             return result;
         }
 
@@ -206,37 +190,37 @@ namespace FitnessApp.ApiGateway.Controllers
         public async Task<SettingsContract> GetSettings()
         {
             var userId = "test".Length == 0 ?
-                _userIdProvider.GetUserId(User)
+                userIdProvider.GetUserId(User)
                 : "savaTest";
-            var response = await _aggregatorService.GetSettings(userId);
-            return _mapper.Map<SettingsContract>(response);
+            var response = await aggregatorService.GetSettings(userId);
+            return mapper.Map<SettingsContract>(response);
         }
 
         [HttpPost("CreateSettings")]
         public async Task<SettingsContract> CreateSettings([FromBody]CreateSettingsContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<CreateSettingsModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<CreateSettingsModel>(contract);
             model.UserId = userId;
-            var response = await _aggregatorService.CreateSettings(model);
-            return _mapper.Map<SettingsContract>(response);
+            var response = await aggregatorService.CreateSettings(model);
+            return mapper.Map<SettingsContract>(response);
         }
 
         [HttpPut("UpdateSettings")]
         public async Task<SettingsContract> UpdateSettings([FromBody]UpdateSettingsContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<UpdateSettingsModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<UpdateSettingsModel>(contract);
             model.UserId = userId;
-            var response = await _aggregatorService.UpdateSettings(model);
-            return _mapper.Map<SettingsContract>(response);
+            var response = await aggregatorService.UpdateSettings(model);
+            return mapper.Map<SettingsContract>(response);
         }
 
         [HttpDelete("DeleteSettings")]
         public async Task<string> DeleteSettings()
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var response = await _aggregatorService.DeleteSettings(userId);
+            var userId = userIdProvider.GetUserId(User);
+            var response = await aggregatorService.DeleteSettings(userId);
             return response;
         }
 
@@ -247,7 +231,7 @@ namespace FitnessApp.ApiGateway.Controllers
         [HttpGet("GetUserProfile")]
         public async Task<UserProfileContract> GetUserProfile()
         {
-            var currentUserId = _userIdProvider.GetUserId(User);
+            var currentUserId = userIdProvider.GetUserId(User);
             return await GetUserProfileById(new GetUserProfileModel
             {
                 UserId = currentUserId,
@@ -258,7 +242,7 @@ namespace FitnessApp.ApiGateway.Controllers
         [HttpGet("GetUserProfile/{userId}")]
         public async Task<UserProfileContract> GetUserProfile([FromRoute] string userId)
         {
-            var currentUserId = _userIdProvider.GetUserId(User);
+            var currentUserId = userIdProvider.GetUserId(User);
             return await GetUserProfileById(new GetUserProfileModel
             {
                 UserId = currentUserId,
@@ -269,33 +253,33 @@ namespace FitnessApp.ApiGateway.Controllers
         [HttpPost("CreateUserProfile")]
         public async Task<UserProfileContract> CreateUserProfile([FromBody]CreateUserProfileContract contract)
         {
-            var model = _mapper.Map<CreateUserProfileModel>(contract);
-            var response = await _aggregatorService.CreateUserProfile(model);
-            return _mapper.Map<UserProfileContract>(response);
+            var model = mapper.Map<CreateUserProfileModel>(contract);
+            var response = await aggregatorService.CreateUserProfile(model);
+            return mapper.Map<UserProfileContract>(response);
         }
 
         [HttpPut("UpdateUserProfile")]
         public async Task<UserProfileContract> UpdateUserProfile([FromBody]UpdateUserProfileContract contract)
         {
-            var currentUserId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<UpdateUserProfileModel>(contract);
+            var currentUserId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<UpdateUserProfileModel>(contract);
             model.UserId = currentUserId;
-            var response = await _aggregatorService.UpdateUserProfile(model);
-            return _mapper.Map<UserProfileContract>(response);
+            var response = await aggregatorService.UpdateUserProfile(model);
+            return mapper.Map<UserProfileContract>(response);
         }
 
         [HttpDelete("DeleteUserProfile")]
         public async Task<string> DeleteUserProfile()
         {
-            var currentUserId = _userIdProvider.GetUserId(User);
-            var response = await _aggregatorService.DeleteUserProfile(currentUserId);
+            var currentUserId = userIdProvider.GetUserId(User);
+            var response = await aggregatorService.DeleteUserProfile(currentUserId);
             return response;
         }
 
         private async Task<UserProfileContract> GetUserProfileById(GetUserProfileModel model)
         {
-            var response = await _aggregatorService.GetUserProfile(model);
-            return _mapper.Map<UserProfileContract>(response);
+            var response = await aggregatorService.GetUserProfile(model);
+            return mapper.Map<UserProfileContract>(response);
         }
 
         #endregion
@@ -305,39 +289,39 @@ namespace FitnessApp.ApiGateway.Controllers
         [HttpGet("GetFood")]
         public async Task<UserFoodsContract> GetFood([FromQuery] GetUserFoodsContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<GetUserFoodsModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<GetUserFoodsModel>(contract);
             model.UserId = userId;
-            var response = await _aggregatorService.GetFoods(model);
-            return _mapper.Map<UserFoodsContract>(response);
+            var response = await aggregatorService.GetFoods(model);
+            return mapper.Map<UserFoodsContract>(response);
         }
 
         [HttpPut("AddFood")]
         public async Task<FoodItemContract> AddFood([FromBody] AddUserFoodContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<AddUserFoodModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<AddUserFoodModel>(contract);
             model.UserId = userId;
-            var response = await _aggregatorService.AddFood(model);
-            return _mapper.Map<FoodItemContract>(response);
+            var response = await aggregatorService.AddFood(model);
+            return mapper.Map<FoodItemContract>(response);
         }
 
         [HttpPut("EditFood")]
         public async Task<FoodItemContract> EditFood([FromBody] UpdateUserFoodContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<UpdateUserFoodModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<UpdateUserFoodModel>(contract);
             model.UserId = userId;
-            var response = await _aggregatorService.EditFood(model);
-            return _mapper.Map<FoodItemContract>(response);
+            var response = await aggregatorService.EditFood(model);
+            return mapper.Map<FoodItemContract>(response);
         }
 
         [HttpDelete("RemoveFood/{foodId}")]
         public async Task<string> RemoveFood([FromRoute] string foodId)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var response = await _aggregatorService.RemoveFood(userId, foodId);
-            return _mapper.Map<string>(response);
+            var userId = userIdProvider.GetUserId(User);
+            var response = await aggregatorService.RemoveFood(userId, foodId);
+            return mapper.Map<string>(response);
         }
 
         #endregion
@@ -347,38 +331,38 @@ namespace FitnessApp.ApiGateway.Controllers
         [HttpGet("GetExercises")]
         public async Task<UserExercisesContract> GetExercises([FromQuery] GetUserExercisesContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<GetUserExercisesModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<GetUserExercisesModel>(contract);
             model.UserId = userId;
-            var response = await _aggregatorService.GetExercises(model);
-            return _mapper.Map<UserExercisesContract>(response);
+            var response = await aggregatorService.GetExercises(model);
+            return mapper.Map<UserExercisesContract>(response);
         }
 
         [HttpPut("AddExercise")]
         public async Task<ExerciseItemContract> AddExercise([FromBody] AddUserExerciseContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<AddUserExerciseModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<AddUserExerciseModel>(contract);
             model.UserId = userId;
-            var response = await _aggregatorService.AddExercise(model);
-            return _mapper.Map<ExerciseItemContract>(response);
+            var response = await aggregatorService.AddExercise(model);
+            return mapper.Map<ExerciseItemContract>(response);
         }
 
         [HttpPut("EditExercise")]
         public async Task<ExerciseItemContract> EditExercise([FromBody] UpdateUserExerciseContract contract)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var model = _mapper.Map<UpdateUserExerciseModel>(contract);
+            var userId = userIdProvider.GetUserId(User);
+            var model = mapper.Map<UpdateUserExerciseModel>(contract);
             model.UserId = userId;
-            var response = await _aggregatorService.EditExercise(model);
-            return _mapper.Map<ExerciseItemContract>(response);
+            var response = await aggregatorService.EditExercise(model);
+            return mapper.Map<ExerciseItemContract>(response);
         }
 
         [HttpDelete("RemoveExercise/{exerciseId}")]
         public async Task<string> RemoveExercise([FromRoute] string exerciseId)
         {
-            var userId = _userIdProvider.GetUserId(User);
-            var response = await _aggregatorService.RemoveExercise(userId, exerciseId);
+            var userId = userIdProvider.GetUserId(User);
+            var response = await aggregatorService.RemoveExercise(userId, exerciseId);
             return response;
         }
 
@@ -392,9 +376,9 @@ namespace FitnessApp.ApiGateway.Controllers
             var model = new NotificationTicketModel
             {
                 Ip = GetRequestIp(),
-                UserId = _userIdProvider.GetUserId(User),
+                UserId = userIdProvider.GetUserId(User),
             };
-            return _aggregatorService.GetNotificationTicket(model);
+            return aggregatorService.GetNotificationTicket(model);
         }
 
         [HttpGet("ValidateNotificationTicket")]
@@ -404,9 +388,9 @@ namespace FitnessApp.ApiGateway.Controllers
             {
                 Ticket = ticket,
                 Ip = GetRequestIp(),
-                UserId = _userIdProvider.GetUserId(User)
+                UserId = userIdProvider.GetUserId(User)
             };
-            return _aggregatorService.ValidateNotificationTicket(model);
+            return aggregatorService.ValidateNotificationTicket(model);
         }
 
         private string GetRequestIp()

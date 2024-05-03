@@ -2,7 +2,5 @@
 
 namespace FitnessApp.ApiGateway.Contracts.Food.Input
 {
-    public class GetUserFoodsContract : GetPagedDataContract
-    {
-    }
+    public class GetUserFoodsContract : GetPagedDataContract;
 }

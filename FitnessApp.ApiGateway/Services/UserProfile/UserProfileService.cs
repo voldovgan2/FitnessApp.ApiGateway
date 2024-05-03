@@ -5,12 +5,16 @@ using FitnessApp.ApiGateway.Configuration;
 using FitnessApp.ApiGateway.Models.Internal;
 using FitnessApp.ApiGateway.Models.UserProfile.Input;
 using FitnessApp.ApiGateway.Models.UserProfile.Output;
-using FitnessApp.ApiGateway.Services.Abstractions.Base;
+using FitnessApp.ApiGateway.Services.Abstractions;
 using FitnessApp.ApiGateway.Services.InternalClient;
 
 namespace FitnessApp.ApiGateway.Services.UserProfile
 {
-    public class UserProfileService : GenericService<UserProfileModel>, IUserProfileService
+    public class UserProfileService(
+        ApiClientSettings apiClientSettings,
+        IInternalClient internalClient)
+        : GenericService<UserProfileModel>(apiClientSettings, internalClient),
+        IUserProfileService
     {
         private const string API = "UserProfile";
         private const string GET_USER_PROFILE_METHOD = "GetUserProfile";
@@ -19,49 +23,37 @@ namespace FitnessApp.ApiGateway.Services.UserProfile
         private const string DELETE_USER_PROFILE_METHOD = "DeleteUserProfile";
         private const string GET_USER_PROFILES_METHOD = "GetUserProfiles";
 
-        private readonly ApiClientSettings _apiClientSettings;
-        private readonly IInternalClient _internalClient;
-
-        public UserProfileService(
-            ApiClientSettings apiClientSettings,
-            IInternalClient internalClient)
-            : base(apiClientSettings, internalClient)
-        {
-            _apiClientSettings = apiClientSettings;
-            _internalClient = internalClient;
-        }
-
         public Task<UserProfileModel> GetUserProfile(string userId)
         {
-            return GetItem(_apiClientSettings.Url, API, GET_USER_PROFILE_METHOD, userId);
+            return GetItem(ApiClientSettings.Url, API, GET_USER_PROFILE_METHOD, userId);
         }
 
         public Task<UserProfileModel> CreateUserProfile(CreateUserProfileModel model)
         {
-            return CreateItem(_apiClientSettings.Url, API, CREATE_USER_PROFILE_METHOD, model);
+            return CreateItem(ApiClientSettings.Url, API, CREATE_USER_PROFILE_METHOD, model);
         }
 
         public Task<UserProfileModel> UpdateUserProfile(UpdateUserProfileModel model)
         {
-            return CreateItem(_apiClientSettings.Url, API, UPDATE_USER_PROFILE_METHOD, model);
+            return CreateItem(ApiClientSettings.Url, API, UPDATE_USER_PROFILE_METHOD, model);
         }
 
         public Task<string> DeleteUserProfile(string userId)
         {
-            return DeleteItem(_apiClientSettings.Url, API, DELETE_USER_PROFILE_METHOD, userId);
+            return DeleteItem(ApiClientSettings.Url, API, DELETE_USER_PROFILE_METHOD, userId);
         }
 
         public async Task<IEnumerable<UserProfileModel>> GetUsersProfiles(GetSelectedUsersProfilesModel model)
         {
             var request = new InternalRequest(
                 HttpMethod.Get,
-                _apiClientSettings.Url,
-                _apiClientSettings.ApiName,
+                ApiClientSettings.Url,
+                ApiClientSettings.ApiName,
                 GET_USER_PROFILES_METHOD,
                 null,
                 model,
                 null);
-            IEnumerable<UserProfileModel> result = await _internalClient.SendInternalRequest<IEnumerable<UserProfileModel>>(null, request);
+            IEnumerable<UserProfileModel> result = await InternalClient.SendInternalRequest<IEnumerable<UserProfileModel>>(null, request);
             return result;
         }
     }

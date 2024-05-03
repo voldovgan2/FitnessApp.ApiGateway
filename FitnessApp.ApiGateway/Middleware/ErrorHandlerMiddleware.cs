@@ -4,17 +4,11 @@ using System.Threading.Tasks;
 using FitnessApp.Common.Middleware;
 using FitnessApp.Common.Serializer.JsonSerializer;
 using Microsoft.AspNetCore.Http;
-using Serilog;
 
 namespace FitnessApp.ApiGateway.Middleware
 {
-    public class ErrorHandlerMiddleware : AbstractErrorHandlerMiddleware
+    public class ErrorHandlerMiddleware(RequestDelegate next, IJsonSerializer serializer) : AbstractErrorHandlerMiddleware(next, serializer)
     {
-        public ErrorHandlerMiddleware(
-            RequestDelegate next,
-            IJsonSerializer serializer)
-            : base(next, serializer) { }
-
         protected override Task HandleGlobalError(HttpContext context, Exception error)
         {
             return Task.CompletedTask;

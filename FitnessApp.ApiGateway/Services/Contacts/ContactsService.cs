@@ -89,7 +89,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 _apiClientSettings.Url,
                 _apiClientSettings.ApiName,
                 GET_USER_CONTACTS_COUNT_METHOD,
-                new string[] { userId },
+                [userId],
                 null,
                 null);
             var result = await _internalClient.SendInternalRequest<UserContactsCountModel>(_authenticationTokenRequest, request);
