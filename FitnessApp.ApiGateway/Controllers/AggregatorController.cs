@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 using AutoMapper;
 using FitnessApp.ApiGateway.Contracts.Contacts.Input;
@@ -33,42 +34,19 @@ namespace FitnessApp.ApiGateway.Controllers
     [EnableCors("AllowAll")]
 
     // [Authorize("Authenticated")]
-    // [RequiredScope(ScopeRequiredByApi)]
+    // [RequiredScope(Scopes.ScopeRequiredByApi)]
     public class AggregatorController(IUserIdProvider userIdProvider, IAggregatorService aggregatorService, IMapper mapper) : Controller
     {
-#pragma warning disable S1144 // Unused private types or members should be removed
-        private const string ScopeRequiredByApi = "User.Read";
-#pragma warning restore S1144 // Unused private types or members should be removed
-
         #region Test
 
         [HttpGet("Test")]
-        public async Task Test()
+        public async Task<SettingsContract> TestGet()
         {
-#pragma warning disable S1075 // URIs should not be hardcoded
-            var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, "http://localhost:7071/api/FollowRequestConfirmed");
-#pragma warning restore S1075 // URIs should not be hardcoded
-            var payload = new
-            {
-                Sender = "user0",
-                Receiver = "volodimir.dovgan@hotmail.com",
-                MessageType = "StartFollow"
-            };
-            request.Content = new System.Net.Http.StringContent(
-                new Common.Serializer.JsonSerializer.JsonSerializer().SerializeToString(payload),
-                System.Text.Encoding.UTF8,
-                "application/json"
-            );
-
-            // request.Headers.Add("Authorization", $"Bearer {token}");
-            var internalHttpClient = new System.Net.Http.HttpClient();
-
-            var response = await internalHttpClient.SendAsync(request);
-#pragma warning disable S1481 // Unused local variables should be removed
-            var content = await response.Content.ReadAsStringAsync();
-#pragma warning restore S1481 // Unused local variables should be removed
-
-            // var response = await _aggregatorService.GetSettings("1");
+            var userId = "test".Length == 0 ?
+                            userIdProvider.GetUserId(User)
+                            : "savaTest";
+            var response = await aggregatorService.GetSettings(userId);
+            return mapper.Map<SettingsContract>(response);
         }
 
         [HttpGet]
@@ -86,16 +64,16 @@ namespace FitnessApp.ApiGateway.Controllers
             });
         }
 
-        [HttpGet("{id}")]
-        public Task<TodoItem> GetTodoItem(int id)
+        [HttpPost]
+        public async Task<SettingsContract> TestPost([FromBody] CreateSettingsContract contract)
         {
-            return Task.FromResult(new TodoItem
-            {
-                Id = id,
-                Description = "Description",
-                Owner = "Owner",
-                Status = true
-            });
+            var userId = "test".Length == 0 ?
+                userIdProvider.GetUserId(User)
+                : "savaTest";
+            var model = mapper.Map<CreateSettingsModel>(contract);
+            model.UserId = userId;
+            var response = await aggregatorService.CreateSettings(model);
+            return mapper.Map<SettingsContract>(response);
         }
 
         #endregion
@@ -189,9 +167,7 @@ namespace FitnessApp.ApiGateway.Controllers
         [HttpGet("GetSettings")]
         public async Task<SettingsContract> GetSettings()
         {
-            var userId = "test".Length == 0 ?
-                userIdProvider.GetUserId(User)
-                : "savaTest";
+            var userId = userIdProvider.GetUserId(User);
             var response = await aggregatorService.GetSettings(userId);
             return mapper.Map<SettingsContract>(response);
         }
