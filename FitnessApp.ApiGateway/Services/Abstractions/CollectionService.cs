@@ -19,7 +19,7 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
                 null,
                 null,
                 payload);
-            var result = await InternalClient.SendInternalRequest<TModel>(CreateAuthenticationTokenRequest(), request);
+            var result = await InternalClient.SendInternalRequest<TModel>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
 
@@ -33,7 +33,7 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
                 null,
                 payload,
                 null);
-            var result = await InternalClient.SendInternalRequest<TCollectionItem>(CreateAuthenticationTokenRequest(), request);
+            var result = await InternalClient.SendInternalRequest<TCollectionItem>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
 
@@ -47,7 +47,7 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
                 null,
                 payload,
                 null);
-            var result = await InternalClient.SendInternalRequest<TCollectionItem>(CreateAuthenticationTokenRequest(), request);
+            var result = await InternalClient.SendInternalRequest<TCollectionItem>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
 
@@ -64,7 +64,7 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
                 ],
                 null,
                 null);
-            var result = await InternalClient.SendInternalRequest<string>(CreateAuthenticationTokenRequest(), request);
+            var result = await InternalClient.SendInternalRequest<string>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
     }

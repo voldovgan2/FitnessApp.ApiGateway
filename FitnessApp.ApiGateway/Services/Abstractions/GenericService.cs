@@ -20,7 +20,7 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
                 null,
                 null,
                 payload);
-            var result = await InternalClient.SendInternalRequest<PagedDataModel<TModel>>(CreateAuthenticationTokenRequest(), request);
+            var result = await InternalClient.SendInternalRequest<PagedDataModel<TModel>>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
 
@@ -34,7 +34,7 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
                 [userId],
                 null,
                 null);
-            var result = await InternalClient.SendInternalRequest<TModel>(CreateAuthenticationTokenRequest(), request);
+            var result = await InternalClient.SendInternalRequest<TModel>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
 
@@ -48,7 +48,7 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
                 null,
                 payload,
                 null);
-            var result = await InternalClient.SendInternalRequest<TModel>(CreateAuthenticationTokenRequest(), request);
+            var result = await InternalClient.SendInternalRequest<TModel>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
 
@@ -62,7 +62,7 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
                 null,
                 payload,
                 null);
-            var result = await InternalClient.SendInternalRequest<TModel>(CreateAuthenticationTokenRequest(), request);
+            var result = await InternalClient.SendInternalRequest<TModel>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
 
@@ -76,7 +76,7 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
                 [userId],
                 null,
                 null);
-            var result = await InternalClient.SendInternalRequest<string>(CreateAuthenticationTokenRequest(), request);
+            var result = await InternalClient.SendInternalRequest<string>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
     }

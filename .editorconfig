@@ -82,6 +82,9 @@ dotnet_diagnostic.SA1502.severity = None
 # Closing parenthesis should not be preceded by a space
 dotnet_diagnostic.SA1009.severity = None
 
+# Closing parenthesis should not be preceded by a space
+dotnet_diagnostic.SA1010.severity = None
+
 # Closing parenthesis should be on line of last parameter
 dotnet_diagnostic.SA1111.severity = None
 

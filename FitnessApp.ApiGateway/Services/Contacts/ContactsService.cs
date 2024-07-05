@@ -27,7 +27,6 @@ namespace FitnessApp.ApiGateway.Services.Contacts
         private readonly IInternalClient _internalClient;
         private readonly ApiClientSettings _apiClientSettings;
         private readonly ISettingsService _settingsService;
-        private readonly AuthenticationTokenRequest _authenticationTokenRequest;
 
         public ContactsService(
             ApiClientSettings apiClientSettings,
@@ -37,11 +36,6 @@ namespace FitnessApp.ApiGateway.Services.Contacts
             _apiClientSettings = apiClientSettings;
             _settingsService = settingsService;
             _internalClient = internalClient;
-            _authenticationTokenRequest = new AuthenticationTokenRequest
-            {
-                ApiName = _apiClientSettings.ApiName,
-                Scope = _apiClientSettings.Scope
-            };
         }
 
         public async Task<bool> CanViewUserContacts(GetUserContactsModel model)
@@ -78,7 +72,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 null,
                 null,
                 payload);
-            var result = await _internalClient.SendInternalRequest<IEnumerable<ContactModel>>(_authenticationTokenRequest, request);
+            var result = await _internalClient.SendInternalRequest<List<ContactModel>>(_apiClientSettings.ApiName, _apiClientSettings.Scope, request);
             return result;
         }
 
@@ -92,7 +86,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 [userId],
                 null,
                 null);
-            var result = await _internalClient.SendInternalRequest<UserContactsCountModel>(_authenticationTokenRequest, request);
+            var result = await _internalClient.SendInternalRequest<UserContactsCountModel>(_apiClientSettings.ApiName, _apiClientSettings.Scope, request);
             return result;
         }
 
@@ -106,7 +100,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 null,
                 null,
                 model);
-            var result = await _internalClient.SendInternalRequest<bool>(_authenticationTokenRequest, request);
+            var result = await _internalClient.SendInternalRequest<bool>(_apiClientSettings.ApiName, _apiClientSettings.Scope, request);
             return result;
         }
 
@@ -120,7 +114,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 null,
                 model,
                 null);
-            var result = await _internalClient.SendInternalRequest<string>(_authenticationTokenRequest, request);
+            var result = await _internalClient.SendInternalRequest<string>(_apiClientSettings.ApiName, _apiClientSettings.Scope, request);
             return result;
         }
 
@@ -134,7 +128,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 null,
                 model,
                 null);
-            var result = await _internalClient.SendInternalRequest<string>(_authenticationTokenRequest, request);
+            var result = await _internalClient.SendInternalRequest<string>(_apiClientSettings.ApiName, _apiClientSettings.Scope, request);
             return result;
         }
 
@@ -148,7 +142,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 null,
                 model,
                 null);
-            var result = await _internalClient.SendInternalRequest<string>(_authenticationTokenRequest, request);
+            var result = await _internalClient.SendInternalRequest<string>(_apiClientSettings.ApiName, _apiClientSettings.Scope, request);
             return result;
         }
 
@@ -162,7 +156,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 null,
                 model,
                 null);
-            var result = await _internalClient.SendInternalRequest<string>(_authenticationTokenRequest, request);
+            var result = await _internalClient.SendInternalRequest<string>(_apiClientSettings.ApiName, _apiClientSettings.Scope, request);
             return result;
         }
 
@@ -177,7 +171,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 model,
                 null
             );
-            var result = await _internalClient.SendInternalRequest<string>(_authenticationTokenRequest, request);
+            var result = await _internalClient.SendInternalRequest<string>(_apiClientSettings.ApiName, _apiClientSettings.Scope, request);
             return result;
         }
 
@@ -192,7 +186,7 @@ namespace FitnessApp.ApiGateway.Services.Contacts
                 model,
                 null
             );
-            var result = await _internalClient.SendInternalRequest<string>(_authenticationTokenRequest, request);
+            var result = await _internalClient.SendInternalRequest<string>(_apiClientSettings.ApiName, _apiClientSettings.Scope, request);
             return result;
         }
     }

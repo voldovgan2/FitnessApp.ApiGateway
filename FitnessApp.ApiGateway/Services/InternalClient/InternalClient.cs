@@ -3,37 +3,26 @@ using System.Text;
 using System.Threading.Tasks;
 using FitnessApp.ApiGateway.Extensions;
 using FitnessApp.ApiGateway.Models.Internal;
-using FitnessApp.ApiGateway.Services.TokenClient;
+using FitnessApp.ApiGateway.Services.Authorization;
 using FitnessApp.Common.Serializer.JsonSerializer;
-using Microsoft.Extensions.Logging;
 
 namespace FitnessApp.ApiGateway.Services.InternalClient
 {
-    public class InternalClient : IInternalClient
+    public class InternalClient(
+        IHttpClientFactory httpClientFactory,
+        ITokenProvider tokenProvider,
+        IJsonSerializer serializer) : IInternalClient
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ITokenClient _tokenClient;
-        private readonly IJsonSerializer _serializer;
-        private readonly ILogger<InternalClient> _logger;
-
-        public InternalClient(
-            IHttpClientFactory httpClientFactory,
-            ITokenClient tokenClient,
-            IJsonSerializer serializer,
-            ILoggerFactory loggerFactory)
+        public async Task<TResponse> SendInternalRequest<TResponse>(string apiName, string scope, InternalRequest internalRequest)
         {
-            _httpClientFactory = httpClientFactory;
-            _tokenClient = tokenClient;
-            _serializer = serializer;
-            _logger = loggerFactory.CreateLogger<InternalClient>();
+            var request = CreateRequest(apiName, scope, internalRequest).GetAwaiter().GetResult();
+            var internalHttpClient = httpClientFactory.CreateClient("InternalClient");
+            var response = await internalHttpClient.SendAsync(request);
+            return await ProcessResponse<TResponse>(response);
         }
 
-        public async Task<TResponse> SendInternalRequest<TResponse>(
-            AuthenticationTokenRequest authenticationTokenRequest,
-            InternalRequest internalRequest)
+        private async Task<HttpRequestMessage> CreateRequest(string apiName, string scope, InternalRequest internalRequest)
         {
-            TResponse result = default;
-            var token = await _tokenClient.GetAuthenticationToken(authenticationTokenRequest);
             var url = internalRequest.BaseUrl.Api(internalRequest.Api).Method(internalRequest.Method);
             if (internalRequest.Routes != null)
                 url = url.Routes(internalRequest.Routes);
@@ -43,25 +32,19 @@ namespace FitnessApp.ApiGateway.Services.InternalClient
 
             var request = new HttpRequestMessage(internalRequest.HttpMethod, url);
             if (internalRequest.Payload != null)
-                request.Content = new StringContent(_serializer.SerializeToString(internalRequest.Payload), Encoding.UTF8, "application/json");
+                request.Content = new StringContent(serializer.SerializeToString(internalRequest.Payload), Encoding.UTF8, "application/json");
 
+            var token = await tokenProvider.GetAuthenticationToken(apiName, scope);
             request.Headers.Add("Authorization", $"Bearer {token}");
-            var internalHttpClient = _httpClientFactory.CreateClient("InternalClient");
-            var response = await internalHttpClient.SendAsync(request);
-            var content = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                result = _serializer.DeserializeFromString<TResponse>(content);
-            }
-            else
-            {
-                var routeDetails = internalRequest.Routes == null ?
-                    ""
-                    : $" Route: {internalRequest.Routes}";
-                _logger.LogError($"Error sending request. Api: {internalRequest.Api} Method: {internalRequest.Method}{routeDetails} Response content: {content}");
-            }
 
-            return result;
+            return request;
+        }
+
+        private async Task<TResponse> ProcessResponse<TResponse>(HttpResponseMessage httpResponseMessage)
+        {
+            var content = await httpResponseMessage.Content.ReadAsStringAsync();
+            httpResponseMessage.EnsureSuccessStatusCode();
+            return serializer.DeserializeFromString<TResponse>(content);
         }
     }
 }

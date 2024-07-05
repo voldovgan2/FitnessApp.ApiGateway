@@ -53,7 +53,7 @@ namespace FitnessApp.ApiGateway.Services.UserProfile
                 null,
                 model,
                 null);
-            IEnumerable<UserProfileModel> result = await InternalClient.SendInternalRequest<IEnumerable<UserProfileModel>>(null, request);
+            IEnumerable<UserProfileModel> result = await InternalClient.SendInternalRequest<List<UserProfileModel>>(ApiClientSettings.ApiName, ApiClientSettings.Scope, request);
             return result;
         }
     }

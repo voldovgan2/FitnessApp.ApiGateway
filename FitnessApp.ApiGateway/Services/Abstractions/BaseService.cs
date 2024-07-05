@@ -1,5 +1,4 @@
 ﻿using FitnessApp.ApiGateway.Configuration;
-using FitnessApp.ApiGateway.Models.Internal;
 using FitnessApp.ApiGateway.Services.InternalClient;
 
 namespace FitnessApp.ApiGateway.Services.Abstractions
@@ -8,14 +7,5 @@ namespace FitnessApp.ApiGateway.Services.Abstractions
     {
         protected IInternalClient InternalClient { get; } = internalClient;
         protected ApiClientSettings ApiClientSettings { get; } = apiClientSettings;
-
-        protected AuthenticationTokenRequest CreateAuthenticationTokenRequest()
-        {
-            return new AuthenticationTokenRequest
-            {
-                ApiName = ApiClientSettings.ApiName,
-                Scope = ApiClientSettings.Scope
-            };
-        }
     }
 }

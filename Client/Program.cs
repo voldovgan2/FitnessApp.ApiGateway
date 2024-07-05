@@ -1,5 +1,10 @@
-﻿using VaultSharp;
+﻿using IdentityModel.Client;
+using VaultSharp;
 using VaultSharp.V1.AuthMethods.Token;
+
+var token = await RequestAuthenticationToken("api.settings");
+if (token.IsError)
+    return;
 
 var authMethod = new TokenAuthMethodInfo("dev-only-token");
 #pragma warning disable S1075 // URIs should not be hardcoded
@@ -13,3 +18,33 @@ if (data.Count == 1)
 var savaTest = await vaultClient.V1.Secrets.KeyValue.V1.ReadSecretAsync("fitness-app");
 Console.WriteLine(savaTest);
 Console.ReadLine();
+
+async Task<TokenResponse> RequestAuthenticationToken(string scope)
+{
+    var tokenHttpClient = new HttpClient();
+    var disco = await tokenHttpClient.GetDiscoveryDocumentAsync(
+        new DiscoveryDocumentRequest
+        {
+            Address = "http://localhost:5000",
+            Policy =
+            {
+                RequireHttps = false
+            }
+        });
+    if (disco.IsError)
+    {
+        throw disco.Exception;
+    }
+    else
+    {
+        var tokenResponse = await tokenHttpClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+        {
+            Address = disco.TokenEndpoint,
+            ClientId = "domain_client",
+            ClientSecret = "domain_client_secret",
+            Scope = scope
+        });
+
+        return tokenResponse;
+    }
+}

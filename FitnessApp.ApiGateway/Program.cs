@@ -1,14 +1,12 @@
-using System.Net.Http.Headers;
 using System.Reflection;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using FitnessApp.ApiGateway;
 using FitnessApp.ApiGateway.Configuration;
 using FitnessApp.ApiGateway.Extensions;
 using FitnessApp.ApiGateway.Middleware;
 using FitnessApp.ApiGateway.Services.Aggregator;
+using FitnessApp.ApiGateway.Services.Authorization;
 using FitnessApp.ApiGateway.Services.InternalClient;
-using FitnessApp.ApiGateway.Services.TokenClient;
 using FitnessApp.ApiGateway.Services.UserIdProvider;
 using FitnessApp.Common.Configuration;
 using FitnessApp.Common.Middleware;
@@ -40,6 +38,8 @@ builder.Services.ConfigureNats(builder.Configuration);
 
 builder.Services.AddTransient<ITokenClient, TokenClient>();
 
+builder.Services.AddTransient<ITokenProvider, TokenProvider>();
+
 builder.Services.AddTransient<IInternalClient, InternalClient>();
 
 builder.Services.AddTransient<IUserIdProvider, UserIdProvider>();
@@ -68,31 +68,20 @@ builder.Services.AddBaseApiClient("Exercises", builder.Configuration);
 
 builder.Services.AddHttpClient("TokenClient");
 
-#pragma warning disable SA1515 // Single-line comment should be preceded by blank line
-#pragma warning disable SA1005 // Single line comments should begin with single space
-builder.Services.AddHttpClient("InternalClient", client =>
-{
-    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-})
-    //.AddPolicyHandler(HttpPolicyExtensions.HandleTransientHttpError()
-    //.OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
-    //.WaitAndRetryAsync(int.Parse(internalApiSection.GetSection("RetryAttempt").Value), retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
-    ;
-#pragma warning restore SA1005 // Single line comments should begin with single space
-#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
+builder.Services.ConfigureInternalHttpClient();
 
 builder.Services
-    .AddAuthentication(opts =>
-    {
-        opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        opts.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
+    .AddAuthentication("Bearer")
     .AddJwtBearer(cfg =>
      {
          cfg.RequireHttpsMetadata = false;
          cfg.Authority = builder.Configuration["ClientAuthenticationSettings:Issuer"];
-         cfg.TokenValidationParameters.ValidAudiences = builder.Configuration["ClientAuthenticationSettings:Audience"].Split(" ");
+         cfg.Audience = builder.Configuration["ClientAuthenticationSettings:Audience"];
+         cfg.TokenValidationParameters = new TokenValidationParameters
+         {
+             ValidAudience = builder.Configuration["ClientAuthenticationSettings:Audience"],
+             ValidIssuer = builder.Configuration["ClientAuthenticationSettings:Issuer"]
+         };
          cfg.Events = new JwtBearerEvents
          {
              OnAuthenticationFailed = context =>
@@ -107,10 +96,7 @@ builder.Services
          };
      });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(builder.Configuration["ClientAuthenticationSettings:Policy"], policy => policy.RequireClaim(ClaimTypes.NameIdentifier));
-});
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
 {

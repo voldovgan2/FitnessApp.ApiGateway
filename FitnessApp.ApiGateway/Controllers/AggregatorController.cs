@@ -24,7 +24,6 @@ using FitnessApp.Common.Paged.Contracts.Output;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Web.Resource;
 
 namespace FitnessApp.ApiGateway.Controllers
 {
@@ -33,9 +32,11 @@ namespace FitnessApp.ApiGateway.Controllers
     [Produces("application/json")]
     [EnableCors("AllowAll")]
 
-    // [Authorize("Authenticated")]
-    // [RequiredScope(Scopes.ScopeRequiredByApi)]
-    public class AggregatorController(IUserIdProvider userIdProvider, IAggregatorService aggregatorService, IMapper mapper) : Controller
+    [Authorize]
+    public class AggregatorController(
+        IUserIdProvider userIdProvider,
+        IAggregatorService aggregatorService,
+        IMapper mapper) : Controller
     {
         #region Test
 
@@ -371,7 +372,7 @@ namespace FitnessApp.ApiGateway.Controllers
 
         private string GetRequestIp()
         {
-            return Request.HttpContext.Connection.RemoteIpAddress.ToString();
+            return Request.HttpContext.Connection.LocalIpAddress?.ToString();
         }
 
         #endregion
