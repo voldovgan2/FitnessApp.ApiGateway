@@ -82,21 +82,19 @@ builder.Services
              ValidAudience = builder.Configuration["ClientAuthenticationSettings:Audience"],
              ValidIssuer = builder.Configuration["ClientAuthenticationSettings:Issuer"]
          };
-         cfg.Events = new JwtBearerEvents
-         {
-             OnAuthenticationFailed = context =>
-             {
-                 if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-                 {
-                     context.Response.Headers.Append("Token-Expired", "true");
-                 }
-
-                 return Task.CompletedTask;
-             }
-         };
      });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(
+    options =>
+{
+    options.AddPolicy("test", policy =>
+    {
+        policy.RequireClaim("Permission", "ToMultiply");
+
+        // Add requirements and remove claims policy
+        policy.AddRequirements([]);
+    });
+});
 
 builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
 {
@@ -121,9 +119,10 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseMiddleware<CorrelationIdHeaderMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.UseCors("AllowAll");
 

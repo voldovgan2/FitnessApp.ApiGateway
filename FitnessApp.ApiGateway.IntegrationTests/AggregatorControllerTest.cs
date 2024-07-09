@@ -142,6 +142,9 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         [Fact]
         public async Task GetSettings_ReturnsOk()
         {
+            // https://blog.joaograssi.com/posts/2021/asp-net-core-testing-permission-protected-api-endpoints/
+            // https://gunnarpeipman.com/aspnet-core-integration-tests-users-roles/
+
             // Act
             var response = await _httpClient.GetAsync("api/Aggregator/GetSettings");
 

@@ -22,11 +22,6 @@ namespace FitnessApp.ApiGateway.IntegrationTests
             builder
                 .ConfigureTestServices(services =>
                 {
-                    services.AddAuthorizationBuilder()
-                            .SetDefaultPolicy(new AuthorizationPolicyBuilder(MockConstants.Scheme)
-                                .RequireAuthenticatedUser()
-                                .Build());
-
                     services
                         .AddAuthentication(defaultScheme: MockConstants.Scheme)
                         .AddScheme<AuthenticationSchemeOptions, MockAuthenticationHandler>(MockConstants.Scheme, options => { });

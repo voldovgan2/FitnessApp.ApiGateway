@@ -32,7 +32,7 @@ namespace FitnessApp.ApiGateway.Controllers
     [Produces("application/json")]
     [EnableCors("AllowAll")]
 
-    [Authorize]
+    [Authorize("test")]
     public class AggregatorController(
         IUserIdProvider userIdProvider,
         IAggregatorService aggregatorService,
