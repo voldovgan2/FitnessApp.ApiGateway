@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Threading.Tasks;
 using FitnessApp.ApiGateway;
 using FitnessApp.ApiGateway.Configuration;
 using FitnessApp.ApiGateway.Extensions;
@@ -11,13 +10,10 @@ using FitnessApp.ApiGateway.Services.UserIdProvider;
 using FitnessApp.Common.Configuration;
 using FitnessApp.Common.Middleware;
 using FitnessApp.Common.Serializer.JsonSerializer;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,38 +66,11 @@ builder.Services.AddHttpClient("TokenClient");
 
 builder.Services.ConfigureInternalHttpClient();
 
-builder.Services
-    .AddAuthentication("Bearer")
-    .AddJwtBearer(cfg =>
-     {
-         cfg.RequireHttpsMetadata = false;
-         cfg.Authority = builder.Configuration["ClientAuthenticationSettings:Issuer"];
-         cfg.Audience = builder.Configuration["ClientAuthenticationSettings:Audience"];
-         cfg.TokenValidationParameters = new TokenValidationParameters
-         {
-             ValidAudience = builder.Configuration["ClientAuthenticationSettings:Audience"],
-             ValidIssuer = builder.Configuration["ClientAuthenticationSettings:Issuer"]
-         };
-     });
+builder.Services.ConfigureAuthentication2(builder.Configuration);
 
-builder.Services.AddAuthorization(
-    options =>
-{
-    options.AddPolicy("test", policy =>
-    {
-        policy.RequireClaim("Permission", "ToMultiply");
+builder.Services.ConfigureAuthorization();
 
-        // Add requirements and remove claims policy
-        policy.AddRequirements([]);
-    });
-});
-
-builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
-{
-    builder.AllowAnyOrigin()
-           .AllowAnyMethod()
-           .AllowAnyHeader();
-}));
+builder.Services.ConfigureCors();
 
 builder.Services.ConfigureSwagger(Assembly.GetExecutingAssembly().GetName().Name);
 

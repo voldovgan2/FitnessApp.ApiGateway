@@ -14,16 +14,20 @@ namespace FitnessApp.ApiGateway.IntegrationTests
     {
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, MockConstants.SvTest),
-                new Claim("Permission", "ToMultiply")
-            };
-            var identity = new ClaimsIdentity(claims, MockConstants.SvTest);
+            var identity = new ClaimsIdentity(GetClaimsByRequest(Request.Path), MockConstants.SvTest);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, MockConstants.Scheme);
             var result = AuthenticateResult.Success(ticket);
             return Task.FromResult(result);
+        }
+
+        private Claim[] GetClaimsByRequest(string path)
+        {
+            ArgumentNullException.ThrowIfNull(path);
+            return [
+                new Claim(ClaimTypes.NameIdentifier, MockConstants.SvTest),
+                new Claim("Permission", "ToMultiply")
+            ];
         }
     }
 }
