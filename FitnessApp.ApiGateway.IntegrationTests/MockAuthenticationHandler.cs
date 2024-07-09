@@ -26,7 +26,7 @@ namespace FitnessApp.ApiGateway.IntegrationTests
             ArgumentNullException.ThrowIfNull(path);
             return [
                 new Claim(ClaimTypes.NameIdentifier, MockConstants.SvTest),
-                new Claim("Permission", "ToMultiply")
+                new Claim("Permission", "Помножувати")
             ];
         }
     }

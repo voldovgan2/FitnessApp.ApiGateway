@@ -10,7 +10,7 @@ namespace FitnessApp.ApiGateway.Authorization
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, SvTestRequirement requirement)
         {
             var permission = context.User.FindFirst(c => c.Type == "Permission");
-            if (permission?.Value == "ToMultiply")
+            if (permission?.Value == "Помножувати")
             {
                 context.Succeed(requirement);
             }
