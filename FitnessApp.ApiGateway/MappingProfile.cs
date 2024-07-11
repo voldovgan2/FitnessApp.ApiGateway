@@ -17,13 +17,12 @@ using FitnessApp.ApiGateway.Models.Settings.Input;
 using FitnessApp.ApiGateway.Models.Settings.Output;
 using FitnessApp.ApiGateway.Models.UserProfile.Input;
 using FitnessApp.ApiGateway.Models.UserProfile.Output;
-using FitnessApp.Common.Mapping;
 using FitnessApp.Common.Paged.Contracts.Output;
 using FitnessApp.Common.Paged.Models.Output;
 
 namespace FitnessApp.ApiGateway
 {
-    public class MappingProfile : PagedMappingProfile<UsersProfilesShortContract, UserProfileModel>
+    public class MappingProfile : Profile
     {
         public MappingProfile()
         {
@@ -32,6 +31,7 @@ namespace FitnessApp.ApiGateway
             CreateMap<SendFollowContract, SendFollowModel>();
             CreateMap<ProcessFollowRequestContract, ProcessFollowRequestModel>();
             CreateMap<PagedDataModel<UserProfileModel>, PagedDataContract<UsersProfilesShortContract>>();
+            CreateMap<PagedDataModel<UsersProfilesShortContract>, PagedDataContract<UserProfileModel>>();
 
             CreateMap<SettingsModel, SettingsContract>();
             CreateMap<CreateSettingsContract, CreateSettingsModel>();
