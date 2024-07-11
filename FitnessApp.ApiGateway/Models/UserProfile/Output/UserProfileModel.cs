@@ -6,22 +6,22 @@ namespace FitnessApp.ApiGateway.Models.UserProfile.Output
 {
     public class UserProfileModel : IFileModel
     {
-        public int FollowersCount { get; set; }
-        public int FollowingsCount { get; set; }
-        public string Id { get; set; }
-        public string UserId { get; set; }
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string CroppedProfilePhoto { get; set; }
-        public string OriginalProfilePhoto { get; set; }
-        public DateTime BirthDate { get; set; }
-        public double Height { get; set; }
-        public double Weight { get; set; }
-        public Gender Gender { get; set; }
-        public string About { get; set; }
-        public string Language { get; set; }
-        public string BackgroundPhoto { get; set; }
-        public bool CanFollow { get; set; }
+        required public int FollowersCount { get; set; }
+        required public int FollowingsCount { get; set; }
+        required public string Id { get; set; }
+        required public string UserId { get; set; }
+        required public string Email { get; set; }
+        required public string FirstName { get; set; }
+        required public string LastName { get; set; }
+        required public string CroppedProfilePhoto { get; set; }
+        required public string OriginalProfilePhoto { get; set; }
+        required public DateTime BirthDate { get; set; }
+        required public double Height { get; set; }
+        required public double Weight { get; set; }
+        required public Gender Gender { get; set; }
+        required public string About { get; set; }
+        required public string Language { get; set; }
+        required public string BackgroundPhoto { get; set; }
+        required public bool CanFollow { get; set; }
     }
 }

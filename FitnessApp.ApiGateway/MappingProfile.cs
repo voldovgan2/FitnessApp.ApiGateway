@@ -18,6 +18,8 @@ using FitnessApp.ApiGateway.Models.Settings.Output;
 using FitnessApp.ApiGateway.Models.UserProfile.Input;
 using FitnessApp.ApiGateway.Models.UserProfile.Output;
 using FitnessApp.Common.Mapping;
+using FitnessApp.Common.Paged.Contracts.Output;
+using FitnessApp.Common.Paged.Models.Output;
 
 namespace FitnessApp.ApiGateway
 {
@@ -25,10 +27,11 @@ namespace FitnessApp.ApiGateway
     {
         public MappingProfile()
         {
+            CreateMap<UserProfileModel, UsersProfilesShortContract>();
             CreateMap<GetUserContactsContract, GetUserContactsModel>();
             CreateMap<SendFollowContract, SendFollowModel>();
             CreateMap<ProcessFollowRequestContract, ProcessFollowRequestModel>();
-            CreateMap<UsersProfilesShortContract, UserProfileModel>();
+            CreateMap<PagedDataModel<UserProfileModel>, PagedDataContract<UsersProfilesShortContract>>();
 
             CreateMap<SettingsModel, SettingsContract>();
             CreateMap<CreateSettingsContract, CreateSettingsModel>();
@@ -43,12 +46,14 @@ namespace FitnessApp.ApiGateway
             CreateMap<AddUserFoodContract, AddUserFoodModel>();
             CreateMap<UpdateUserFoodContract, UpdateUserFoodModel>();
             CreateMap<FoodItemModel, FoodItemContract>();
+            CreateMap<PagedDataModel<FoodItemModel>, PagedDataContract<FoodItemContract>>();
 
             CreateMap<GetUserExercisesContract, GetUserExercisesModel>();
             CreateMap<UserExercisesModel, UserExercisesContract>();
             CreateMap<AddUserExerciseContract, AddUserExerciseModel>();
             CreateMap<UpdateUserExerciseContract, UpdateUserExerciseModel>();
             CreateMap<ExerciseItemModel, ExerciseItemContract>();
+            CreateMap<PagedDataModel<ExerciseItemModel>, PagedDataContract<ExerciseItemContract>>();
         }
     }
 }

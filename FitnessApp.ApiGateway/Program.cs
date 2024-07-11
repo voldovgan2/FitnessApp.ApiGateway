@@ -9,7 +9,6 @@ using FitnessApp.ApiGateway.Services.InternalClient;
 using FitnessApp.ApiGateway.Services.UserIdProvider;
 using FitnessApp.Common.Configuration;
 using FitnessApp.Common.Middleware;
-using FitnessApp.Common.Serializer.JsonSerializer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +23,6 @@ builder.Services.AddDistributedRedisCache(option =>
     option.Configuration = builder.Configuration["Redis:Configuration"];
 });
 
-builder.Services.AddTransient<IJsonSerializer, JsonSerializer>();
 builder.Services.ConfigureMapper(new MappingProfile());
 
 var apiAuthenticationSettings = builder.Configuration.GetSection("ApiAuthenticationSettings");

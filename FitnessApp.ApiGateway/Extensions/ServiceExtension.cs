@@ -6,7 +6,6 @@ using FitnessApp.ApiGateway.Services.InternalClient;
 using FitnessApp.ApiGateway.Services.NotificationService;
 using FitnessApp.ApiGateway.Services.Settings;
 using FitnessApp.ApiGateway.Services.UserProfile;
-using FitnessApp.Common.Serializer.JsonSerializer;
 using FitnessApp.Common.ServiceBus.Nats.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
@@ -87,10 +86,7 @@ namespace FitnessApp.ApiGateway.Extensions
             services.AddTransient<INotificationService, NotificationService>(
                 sp =>
                 {
-                    return new NotificationService(
-                        sp.GetRequiredService<IServiceBus>(),
-                        sp.GetRequiredService<IDistributedCache>(),
-                        sp.GetRequiredService<IJsonSerializer>());
+                    return new NotificationService(sp.GetRequiredService<IServiceBus>(), sp.GetRequiredService<IDistributedCache>());
                 }
             );
             return services;

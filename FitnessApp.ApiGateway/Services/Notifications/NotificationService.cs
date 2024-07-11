@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using FitnessApp.ApiGateway.Exceptions;
 using FitnessApp.ApiGateway.Models.Notification;
-using FitnessApp.Common.Serializer.JsonSerializer;
+using FitnessApp.Common.Extensions;
 using FitnessApp.Common.ServiceBus.Nats;
 using FitnessApp.Common.ServiceBus.Nats.Events;
 using FitnessApp.Common.ServiceBus.Nats.Services;
@@ -10,10 +10,7 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace FitnessApp.ApiGateway.Services.NotificationService
 {
-    public class NotificationService(
-        IServiceBus serviceBus,
-        IDistributedCache distributedCache,
-        IJsonSerializer serializer) : INotificationService
+    public class NotificationService(IServiceBus serviceBus, IDistributedCache distributedCache) : INotificationService
     {
         private const int KEY_EXPIRES_SECONDS = 5;
 
@@ -32,7 +29,7 @@ namespace FitnessApp.ApiGateway.Services.NotificationService
 
         public Task SendMessage(FollowRequestConfirmed model)
         {
-            serviceBus.PublishEvent(Topic.FOLLOW_REQUEST_CONFIRMED, serializer.SerializeToBytes(model));
+            serviceBus.PublishEvent(Topic.FOLLOW_REQUEST_CONFIRMED, JsonSerializerHelper.SerializeToBytes(model));
             return Task.CompletedTask;
         }
 

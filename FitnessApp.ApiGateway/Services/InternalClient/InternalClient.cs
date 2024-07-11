@@ -1,17 +1,14 @@
 ﻿using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using FitnessApp.ApiGateway.Extensions;
 using FitnessApp.ApiGateway.Models.Internal;
 using FitnessApp.ApiGateway.Services.Authorization;
-using FitnessApp.Common.Serializer.JsonSerializer;
 
 namespace FitnessApp.ApiGateway.Services.InternalClient
 {
-    public class InternalClient(
-        IHttpClientFactory httpClientFactory,
-        ITokenProvider tokenProvider,
-        IJsonSerializer serializer) : IInternalClient
+    public class InternalClient(IHttpClientFactory httpClientFactory, ITokenProvider tokenProvider) : IInternalClient
     {
         public async Task<TResponse> SendInternalRequest<TResponse>(string apiName, string scope, InternalRequest internalRequest)
         {
@@ -32,7 +29,7 @@ namespace FitnessApp.ApiGateway.Services.InternalClient
 
             var request = new HttpRequestMessage(internalRequest.HttpMethod, url);
             if (internalRequest.Payload != null)
-                request.Content = new StringContent(serializer.SerializeToString(internalRequest.Payload), Encoding.UTF8, "application/json");
+                request.Content = new StringContent(JsonSerializer.Serialize(internalRequest.Payload), Encoding.UTF8, "application/json");
 
             var token = await tokenProvider.GetAuthenticationToken(apiName, scope);
             request.Headers.Add("Authorization", $"Bearer {token}");
@@ -44,7 +41,7 @@ namespace FitnessApp.ApiGateway.Services.InternalClient
         {
             var content = await httpResponseMessage.Content.ReadAsStringAsync();
             httpResponseMessage.EnsureSuccessStatusCode();
-            return serializer.DeserializeFromString<TResponse>(content);
+            return JsonSerializer.Deserialize<TResponse>(content);
         }
     }
 }

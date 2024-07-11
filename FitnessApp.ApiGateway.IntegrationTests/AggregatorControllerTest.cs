@@ -3,10 +3,16 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using FitnessApp.ApiGateway.Contracts.Contacts.Input;
 using FitnessApp.ApiGateway.Contracts.Exercises.Input;
+using FitnessApp.ApiGateway.Contracts.Exercises.Output;
 using FitnessApp.ApiGateway.Contracts.Food.Input;
+using FitnessApp.ApiGateway.Contracts.Food.Output;
 using FitnessApp.ApiGateway.Contracts.Settings.Input;
+using FitnessApp.ApiGateway.Contracts.Settings.Output;
 using FitnessApp.ApiGateway.Contracts.UserProfile.Input;
+using FitnessApp.ApiGateway.Contracts.UserProfile.Output;
+using FitnessApp.Common.Paged.Contracts.Output;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Newtonsoft.Json;
 
 namespace FitnessApp.ApiGateway.IntegrationTests
 {
@@ -30,10 +36,12 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         public async Task GetUserContacts_ReturnsOk()
         {
             // Act
-            var response = await _httpClient.GetAsync("api/Aggregator/GetUserContacts?contactsUserId=svTest&contactsType=0");
+            var response = await _httpClient.GetAsync("api/Aggregator/GetUserContacts?contactsUserId=svTest&contactsType=0&page=0&pageSize=10");
+            var responseData = JsonConvert.DeserializeObject<PagedDataContract<UsersProfilesShortContract>>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -47,9 +55,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PostAsJsonAsync("api/Aggregator/StartFollow", sendFollowContract);
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -64,9 +74,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PostAsJsonAsync("api/Aggregator/acceptFollowRequest", acceptFollowRequest);
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -81,9 +93,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PostAsJsonAsync("api/Aggregator/rejectFollowRequest", rejectFollowRequest);
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -97,9 +111,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PostAsJsonAsync("api/Aggregator/deleteFollowRequest", deleteFollowRequest);
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -114,9 +130,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PostAsJsonAsync("api/Aggregator/deleteFollower", deleteFollowerRequest);
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -130,9 +148,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PostAsJsonAsync("api/Aggregator/unfollowUser", unfollowUserRequest);
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         #endregion
@@ -144,9 +164,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.GetAsync("api/Aggregator/GetSettings");
+            var responseData = JsonConvert.DeserializeObject<SettingsContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -166,9 +188,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PostAsJsonAsync("api/Aggregator/CreateSettings", createSettingsContract);
+            var responseData = JsonConvert.DeserializeObject<SettingsContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -188,9 +212,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PutAsJsonAsync("api/Aggregator/UpdateSettings", updateSettingsContract);
+            var responseData = JsonConvert.DeserializeObject<SettingsContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -198,9 +224,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.DeleteAsync("api/Aggregator/DeleteSettings");
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         #endregion
@@ -212,9 +240,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.GetAsync("api/Aggregator/GetUserProfile");
+            var responseData = JsonConvert.DeserializeObject<UserProfileContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -222,9 +252,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.GetAsync("api/Aggregator/GetUserProfile/1");
+            var responseData = JsonConvert.DeserializeObject<UserProfileContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -249,9 +281,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PostAsJsonAsync("api/Aggregator/CreateUserProfile", createUserProfileContract);
+            var responseData = JsonConvert.DeserializeObject<UserProfileContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -276,9 +310,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PutAsJsonAsync("api/Aggregator/UpdateUserProfile", updateUserProfileContract);
+            var responseData = JsonConvert.DeserializeObject<UserProfileContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -286,9 +322,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.DeleteAsync("api/Aggregator/DeleteUserProfile");
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         #endregion
@@ -300,9 +338,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.GetAsync("api/Aggregator/GetFood");
+            var responseData = JsonConvert.DeserializeObject<UserFoodsContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -319,9 +359,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PutAsJsonAsync("api/Aggregator/AddFood", addUserFoodContract);
+            var responseData = JsonConvert.DeserializeObject<FoodItemContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -338,9 +380,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PutAsJsonAsync("api/Aggregator/EditFood", updateUserFoodContract);
+            var responseData = JsonConvert.DeserializeObject<FoodItemContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -348,9 +392,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.DeleteAsync("api/Aggregator/RemoveFood/1");
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         #endregion
@@ -362,9 +408,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.GetAsync("api/Aggregator/GetExercises");
+            var responseData = JsonConvert.DeserializeObject<UserExercisesContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -381,9 +429,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PutAsJsonAsync("api/Aggregator/AddExercise", addUserExerciseContract);
+            var responseData = JsonConvert.DeserializeObject<ExerciseItemContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -400,9 +450,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
 
             // Act
             var response = await _httpClient.PutAsJsonAsync("api/Aggregator/EditExercise", updateUserExerciseContract);
+            var responseData = JsonConvert.DeserializeObject<ExerciseItemContract>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -410,9 +462,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.DeleteAsync("api/Aggregator/RemoveExercise/1");
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         #endregion
@@ -424,9 +478,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.GetAsync("api/Aggregator/GetNotificationTicket");
+            var responseData = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData);
         }
 
         [Fact]
@@ -434,9 +490,11 @@ namespace FitnessApp.ApiGateway.IntegrationTests
         {
             // Act
             var response = await _httpClient.GetAsync("api/Aggregator/ValidateNotificationTicket?ticket=svTest");
+            var responseData = JsonConvert.DeserializeObject<bool>(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(responseData.ToString());
         }
 
         #endregion
