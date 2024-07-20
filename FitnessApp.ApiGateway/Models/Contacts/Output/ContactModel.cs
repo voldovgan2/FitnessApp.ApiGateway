@@ -1,10 +1,9 @@
 ﻿using Newtonsoft.Json;
 
-namespace FitnessApp.ApiGateway.Models.Contacts.Output
+namespace FitnessApp.ApiGateway.Models.Contacts.Output;
+
+public class ContactModel
 {
-    public class ContactModel
-    {
-        [JsonRequired]
-        public string UserId { get; set; }
-    }
+    [JsonRequired]
+    public string UserId { get; set; }
 }

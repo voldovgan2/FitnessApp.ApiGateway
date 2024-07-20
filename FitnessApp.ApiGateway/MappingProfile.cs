@@ -20,40 +20,39 @@ using FitnessApp.ApiGateway.Models.UserProfile.Output;
 using FitnessApp.Common.Paged.Contracts.Output;
 using FitnessApp.Common.Paged.Models.Output;
 
-namespace FitnessApp.ApiGateway
+namespace FitnessApp.ApiGateway;
+
+public class MappingProfile : Profile
 {
-    public class MappingProfile : Profile
+    public MappingProfile()
     {
-        public MappingProfile()
-        {
-            CreateMap<UserProfileModel, UsersProfilesShortContract>();
-            CreateMap<GetUserContactsContract, GetUserContactsModel>();
-            CreateMap<SendFollowContract, SendFollowModel>();
-            CreateMap<ProcessFollowRequestContract, ProcessFollowRequestModel>();
-            CreateMap<PagedDataModel<UserProfileModel>, PagedDataContract<UsersProfilesShortContract>>();
-            CreateMap<PagedDataModel<UsersProfilesShortContract>, PagedDataContract<UserProfileModel>>();
+        CreateMap<UserProfileModel, UsersProfilesShortContract>();
+        CreateMap<GetUserContactsContract, GetUserContactsModel>();
+        CreateMap<SendFollowContract, SendFollowModel>();
+        CreateMap<ProcessFollowRequestContract, ProcessFollowRequestModel>();
+        CreateMap<PagedDataModel<UserProfileModel>, PagedDataContract<UsersProfilesShortContract>>();
+        CreateMap<PagedDataModel<UsersProfilesShortContract>, PagedDataContract<UserProfileModel>>();
 
-            CreateMap<SettingsModel, SettingsContract>();
-            CreateMap<CreateSettingsContract, CreateSettingsModel>();
-            CreateMap<UpdateSettingsContract, UpdateSettingsModel>();
+        CreateMap<SettingsModel, SettingsContract>();
+        CreateMap<CreateSettingsContract, CreateSettingsModel>();
+        CreateMap<UpdateSettingsContract, UpdateSettingsModel>();
 
-            CreateMap<UserProfileModel, UserProfileContract>();
-            CreateMap<CreateUserProfileContract, CreateUserProfileModel>();
-            CreateMap<UpdateUserProfileContract, UpdateUserProfileModel>();
+        CreateMap<UserProfileModel, UserProfileContract>();
+        CreateMap<CreateUserProfileContract, CreateUserProfileModel>();
+        CreateMap<UpdateUserProfileContract, UpdateUserProfileModel>();
 
-            CreateMap<GetUserFoodsContract, GetUserFoodsModel>();
-            CreateMap<UserFoodsModel, UserFoodsContract>();
-            CreateMap<AddUserFoodContract, AddUserFoodModel>();
-            CreateMap<UpdateUserFoodContract, UpdateUserFoodModel>();
-            CreateMap<FoodItemModel, FoodItemContract>();
-            CreateMap<PagedDataModel<FoodItemModel>, PagedDataContract<FoodItemContract>>();
+        CreateMap<GetUserFoodsContract, GetUserFoodsModel>();
+        CreateMap<UserFoodsModel, UserFoodsContract>();
+        CreateMap<AddUserFoodContract, AddUserFoodModel>();
+        CreateMap<UpdateUserFoodContract, UpdateUserFoodModel>();
+        CreateMap<FoodItemModel, FoodItemContract>();
+        CreateMap<PagedDataModel<FoodItemModel>, PagedDataContract<FoodItemContract>>();
 
-            CreateMap<GetUserExercisesContract, GetUserExercisesModel>();
-            CreateMap<UserExercisesModel, UserExercisesContract>();
-            CreateMap<AddUserExerciseContract, AddUserExerciseModel>();
-            CreateMap<UpdateUserExerciseContract, UpdateUserExerciseModel>();
-            CreateMap<ExerciseItemModel, ExerciseItemContract>();
-            CreateMap<PagedDataModel<ExerciseItemModel>, PagedDataContract<ExerciseItemContract>>();
-        }
+        CreateMap<GetUserExercisesContract, GetUserExercisesModel>();
+        CreateMap<UserExercisesModel, UserExercisesContract>();
+        CreateMap<AddUserExerciseContract, AddUserExerciseModel>();
+        CreateMap<UpdateUserExerciseContract, UpdateUserExerciseModel>();
+        CreateMap<ExerciseItemModel, ExerciseItemContract>();
+        CreateMap<PagedDataModel<ExerciseItemModel>, PagedDataContract<ExerciseItemContract>>();
     }
 }

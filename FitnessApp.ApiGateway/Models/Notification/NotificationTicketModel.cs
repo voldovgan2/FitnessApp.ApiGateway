@@ -1,8 +1,7 @@
-﻿namespace FitnessApp.ApiGateway.Models.Notification
+﻿namespace FitnessApp.ApiGateway.Models.Notification;
+
+public class NotificationTicketModel
 {
-    public class NotificationTicketModel
-    {
-        public string Ip { get; set; }
-        public string UserId { get; set; }
-    }
+    public string Ip { get; set; }
+    public string UserId { get; set; }
 }

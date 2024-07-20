@@ -1,7 +1,6 @@
-﻿namespace FitnessApp.ApiGateway.Models.File.Output
+﻿namespace FitnessApp.ApiGateway.Models.File.Output;
+
+public interface IFileModel
 {
-    public interface IFileModel
-    {
-        public string Id { get; set; }
-    }
+    public string Id { get; set; }
 }

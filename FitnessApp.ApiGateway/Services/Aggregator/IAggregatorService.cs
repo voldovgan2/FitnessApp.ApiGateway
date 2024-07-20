@@ -11,65 +11,64 @@ using FitnessApp.ApiGateway.Models.UserProfile.Input;
 using FitnessApp.ApiGateway.Models.UserProfile.Output;
 using FitnessApp.Common.Paged.Models.Output;
 
-namespace FitnessApp.ApiGateway.Services.Aggregator
+namespace FitnessApp.ApiGateway.Services.Aggregator;
+
+public interface IAggregatorService
 {
-    public interface IAggregatorService
-    {
-        #region Contacts
+    #region Contacts
 
-        Task<bool> CanViewUserContacts(GetUserContactsModel model);
-        Task<PagedDataModel<UserProfileModel>> GetUserContacts(GetUserContactsModel model);
-        Task<string> StartFollow(SendFollowModel model);
-        Task<string> AcceptFollowRequest(ProcessFollowRequestModel model);
-        Task<string> RejectFollowRequest(ProcessFollowRequestModel model);
-        Task<string> DeleteFollowRequest(SendFollowModel model);
-        Task<string> DeleteFollower(ProcessFollowRequestModel model);
-        Task<string> UnfollowUser(SendFollowModel model);
+    Task<bool> CanViewUserContacts(GetUserContactsModel model);
+    Task<PagedDataModel<UserProfileModel>> GetUserContacts(GetUserContactsModel model);
+    Task<string> StartFollow(SendFollowModel model);
+    Task<string> AcceptFollowRequest(ProcessFollowRequestModel model);
+    Task<string> RejectFollowRequest(ProcessFollowRequestModel model);
+    Task<string> DeleteFollowRequest(SendFollowModel model);
+    Task<string> DeleteFollower(ProcessFollowRequestModel model);
+    Task<string> UnfollowUser(SendFollowModel model);
 
-        #endregion
+    #endregion
 
-        #region Settings
+    #region Settings
 
-        Task<SettingsModel> GetSettings(string userId);
-        Task<SettingsModel> CreateSettings(CreateSettingsModel model);
-        Task<SettingsModel> UpdateSettings(UpdateSettingsModel model);
-        Task<string> DeleteSettings(string userId);
+    Task<SettingsModel> GetSettings(string userId);
+    Task<SettingsModel> CreateSettings(CreateSettingsModel model);
+    Task<SettingsModel> UpdateSettings(UpdateSettingsModel model);
+    Task<string> DeleteSettings(string userId);
 
-        #endregion
+    #endregion
 
-        #region UserProfile
+    #region UserProfile
 
-        Task<UserProfileModel> GetUserProfile(GetUserProfileModel model);
-        Task<UserProfileModel> CreateUserProfile(CreateUserProfileModel model);
-        Task<UserProfileModel> UpdateUserProfile(UpdateUserProfileModel model);
-        Task<string> DeleteUserProfile(string userId);
+    Task<UserProfileModel> GetUserProfile(GetUserProfileModel model);
+    Task<UserProfileModel> CreateUserProfile(CreateUserProfileModel model);
+    Task<UserProfileModel> UpdateUserProfile(UpdateUserProfileModel model);
+    Task<string> DeleteUserProfile(string userId);
 
-        #endregion
+    #endregion
 
-        #region Food
+    #region Food
 
-        Task<UserFoodsModel> GetFoods(GetUserFoodsModel model);
-        Task<FoodItemModel> AddFood(AddUserFoodModel model);
-        Task<FoodItemModel> EditFood(UpdateUserFoodModel model);
-        Task<string> RemoveFood(string userId, string foodId);
+    Task<UserFoodsModel> GetFoods(GetUserFoodsModel model);
+    Task<FoodItemModel> AddFood(AddUserFoodModel model);
+    Task<FoodItemModel> EditFood(UpdateUserFoodModel model);
+    Task<string> RemoveFood(string userId, string foodId);
 
-        #endregion
+    #endregion
 
-        #region Exercises
+    #region Exercises
 
-        Task<UserExercisesModel> GetExercises(GetUserExercisesModel model);
-        Task<ExerciseItemModel> AddExercise(AddUserExerciseModel model);
-        Task<ExerciseItemModel> EditExercise(UpdateUserExerciseModel model);
-        Task<string> RemoveExercise(string userId, string exerciseId);
+    Task<UserExercisesModel> GetExercises(GetUserExercisesModel model);
+    Task<ExerciseItemModel> AddExercise(AddUserExerciseModel model);
+    Task<ExerciseItemModel> EditExercise(UpdateUserExerciseModel model);
+    Task<string> RemoveExercise(string userId, string exerciseId);
 
-        #endregion
+    #endregion
 
-        #region NotificationService
+    #region NotificationService
 
-        Task<string> GetNotificationTicket(NotificationTicketModel model);
+    Task<string> GetNotificationTicket(NotificationTicketModel model);
 
-        Task<bool> ValidateNotificationTicket(ValidateNotificationTicketModel model);
+    Task<bool> ValidateNotificationTicket(ValidateNotificationTicketModel model);
 
-        #endregion
-    }
+    #endregion
 }

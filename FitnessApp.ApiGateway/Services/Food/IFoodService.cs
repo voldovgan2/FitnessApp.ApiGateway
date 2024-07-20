@@ -2,13 +2,12 @@
 using FitnessApp.ApiGateway.Models.Food.Input;
 using FitnessApp.ApiGateway.Models.Food.Output;
 
-namespace FitnessApp.ApiGateway.Services.Food
+namespace FitnessApp.ApiGateway.Services.Food;
+
+public interface IFoodService
 {
-    public interface IFoodService
-    {
-        Task<UserFoodsModel> GetFoods(GetUserFoodsModel model);
-        Task<FoodItemModel> AddFood(AddUserFoodModel model);
-        Task<FoodItemModel> EditFood(UpdateUserFoodModel model);
-        Task<string> RemoveFood(string userId, string foodId);
-    }
+    Task<UserFoodsModel> GetFoods(GetUserFoodsModel model);
+    Task<FoodItemModel> AddFood(AddUserFoodModel model);
+    Task<FoodItemModel> EditFood(UpdateUserFoodModel model);
+    Task<string> RemoveFood(string userId, string foodId);
 }

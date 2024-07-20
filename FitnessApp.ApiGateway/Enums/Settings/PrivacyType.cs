@@ -1,9 +1,8 @@
-﻿namespace FitnessApp.ApiGateway.Enums.Settings
+﻿namespace FitnessApp.ApiGateway.Enums.Settings;
+
+public enum PrivacyType
 {
-    public enum PrivacyType
-    {
-        All,
-        Followers,
-        JustMe
-    }
+    All,
+    Followers,
+    JustMe
 }

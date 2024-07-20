@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace FitnessApp.ApiGateway.Models.UserProfile.Input
+namespace FitnessApp.ApiGateway.Models.UserProfile.Input;
+
+public class GetSelectedUsersProfilesModel
 {
-    public class GetSelectedUsersProfilesModel
-    {
-        public IEnumerable<string> UsersIds { get; set; }
-    }
+    public IEnumerable<string> UsersIds { get; set; }
 }

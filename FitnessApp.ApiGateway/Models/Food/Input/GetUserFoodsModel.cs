@@ -1,9 +1,8 @@
 ﻿using FitnessApp.Common.Paged.Models.Input;
 
-namespace FitnessApp.ApiGateway.Models.Food.Input
+namespace FitnessApp.ApiGateway.Models.Food.Input;
+
+public class GetUserFoodsModel : GetPagedDataModel
 {
-    public class GetUserFoodsModel : GetPagedDataModel
-    {
-        public string UserId { get; set; }
-    }
+    public string UserId { get; set; }
 }

@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace FitnessApp.ApiGateway.Services.Authorization
+namespace FitnessApp.ApiGateway.Services.Authorization;
+
+public interface ITokenProvider
 {
-    public interface ITokenProvider
-    {
-        Task<string> GetAuthenticationToken(string apiName, string scope, bool useCache = false);
-    }
+    Task<string> GetAuthenticationToken(string apiName, string scope, bool useCache = false);
 }

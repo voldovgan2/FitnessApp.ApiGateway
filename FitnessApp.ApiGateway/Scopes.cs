@@ -1,7 +1,6 @@
-﻿namespace FitnessApp.ApiGateway
+﻿namespace FitnessApp.ApiGateway;
+
+public class Scopes
 {
-    public class Scopes
-    {
-        public const string ScopeRequiredByApi = "User.Read";
-    }
+    public const string ScopeRequiredByApi = "User.Read";
 }

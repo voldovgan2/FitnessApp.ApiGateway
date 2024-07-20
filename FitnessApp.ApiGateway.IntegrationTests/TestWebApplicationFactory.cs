@@ -13,36 +13,35 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace FitnessApp.ApiGateway.IntegrationTests
+namespace FitnessApp.ApiGateway.IntegrationTests;
+
+public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
-    public class TestWebApplicationFactory : WebApplicationFactory<Program>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder
-                .ConfigureTestServices(services =>
-                {
-                    services
-                        .AddAuthentication(defaultScheme: MockConstants.Scheme)
-                        .AddScheme<AuthenticationSchemeOptions, MockAuthenticationHandler>(MockConstants.Scheme, options => { });
+        builder
+            .ConfigureTestServices(services =>
+            {
+                services
+                    .AddAuthentication(defaultScheme: MockConstants.Scheme)
+                    .AddScheme<AuthenticationSchemeOptions, MockAuthenticationHandler>(MockConstants.Scheme, options => { });
 
-                    services.RemoveAll<IVaultService>();
-                    services.AddSingleton<IVaultService, MockVaultService>();
+                services.RemoveAll<IVaultService>();
+                services.AddSingleton<IVaultService, MockVaultService>();
 
-                    services.RemoveAll<IServiceBus>();
-                    services.AddSingleton<IServiceBus, MockServiceBus>();
+                services.RemoveAll<IServiceBus>();
+                services.AddSingleton<IServiceBus, MockServiceBus>();
 
-                    services.RemoveAll<ITokenClient>();
-                    services.AddSingleton<ITokenClient, MockTokenClient>();
+                services.RemoveAll<ITokenClient>();
+                services.AddSingleton<ITokenClient, MockTokenClient>();
 
-                    services.RemoveAll<IInternalClient>();
-                    services.AddSingleton<IInternalClient, MockInternalClient>();
+                services.RemoveAll<IInternalClient>();
+                services.AddSingleton<IInternalClient, MockInternalClient>();
 
-                    services.RemoveAll<IDistributedCache>();
-                    services.AddSingleton(Options.Create(new MemoryDistributedCacheOptions()));
-                    services.AddSingleton<IDistributedCache, MemoryDistributedCache>();
-                })
-                .UseEnvironment("Development");
-        }
+                services.RemoveAll<IDistributedCache>();
+                services.AddSingleton(Options.Create(new MemoryDistributedCacheOptions()));
+                services.AddSingleton<IDistributedCache, MemoryDistributedCache>();
+            })
+            .UseEnvironment("Development");
     }
 }

@@ -1,9 +1,8 @@
 ﻿using System.Security.Claims;
 
-namespace FitnessApp.ApiGateway.Services.UserIdProvider
+namespace FitnessApp.ApiGateway.Services.UserIdProvider;
+
+public interface IUserIdProvider
 {
-    public interface IUserIdProvider
-    {
-        string GetUserId(ClaimsPrincipal user);
-    }
+    string GetUserId(ClaimsPrincipal user);
 }

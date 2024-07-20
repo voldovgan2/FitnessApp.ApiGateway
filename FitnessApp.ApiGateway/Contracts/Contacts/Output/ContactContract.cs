@@ -1,7 +1,6 @@
-﻿namespace FitnessApp.ApiGateway.Contracts.Contacts.Output
+﻿namespace FitnessApp.ApiGateway.Contracts.Contacts.Output;
+
+public class ContactContract
 {
-    public class ContactContract
-    {
-        public string Id { get; set; }
-    }
+    public string Id { get; set; }
 }
