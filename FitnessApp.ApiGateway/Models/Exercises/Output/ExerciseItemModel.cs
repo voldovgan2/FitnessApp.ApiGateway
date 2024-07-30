@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using FitnessApp.ApiGateway.Models.File.Output;
 
 namespace FitnessApp.ApiGateway.Models.Exercises.Output;
 
+[ExcludeFromCodeCoverage]
 public class ExerciseItemModel : IFileModel
 {
     public string Id { get; set; }

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 
 namespace FitnessApp.ApiGateway.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class UrlExtensions
 {
     public static string Api(this string url, string apiName)

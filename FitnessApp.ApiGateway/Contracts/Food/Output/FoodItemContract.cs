@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 
 namespace FitnessApp.ApiGateway.Contracts.Food.Output;
 
+[ExcludeFromCodeCoverage]
 public class FoodItemContract
 {
     [JsonRequired]

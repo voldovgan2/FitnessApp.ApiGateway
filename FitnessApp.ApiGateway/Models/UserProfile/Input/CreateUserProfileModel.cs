@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using FitnessApp.ApiGateway.Enums.UserProfile;
 
 namespace FitnessApp.ApiGateway.Models.UserProfile.Input;
 
+[ExcludeFromCodeCoverage]
 public class CreateUserProfileModel
 {
     public string Email { get; set; }

@@ -1,8 +1,10 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FitnessApp.ApiGateway.Configuration;
 
+[ExcludeFromCodeCoverage]
 public static class InternalHttpClientExtensions
 {
     public static IServiceCollection ConfigureInternalHttpClient(this IServiceCollection services)

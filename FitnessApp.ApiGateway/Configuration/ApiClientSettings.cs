@@ -1,5 +1,8 @@
-﻿namespace FitnessApp.ApiGateway.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FitnessApp.ApiGateway.Configuration;
+
+[ExcludeFromCodeCoverage]
 public class ApiClientSettings
 {
     public string ApiName { get; set; }

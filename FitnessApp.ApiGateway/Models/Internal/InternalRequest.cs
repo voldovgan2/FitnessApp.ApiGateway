@@ -1,7 +1,9 @@
-﻿using System.Net.Http;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.Http;
 
 namespace FitnessApp.ApiGateway.Models.Internal;
 
+[ExcludeFromCodeCoverage]
 public class InternalRequest
 {
     public HttpMethod HttpMethod { get; }

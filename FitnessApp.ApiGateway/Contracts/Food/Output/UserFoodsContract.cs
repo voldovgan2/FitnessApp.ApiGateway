@@ -1,8 +1,10 @@
-﻿using FitnessApp.Common.Paged.Contracts.Output;
+﻿using System.Diagnostics.CodeAnalysis;
+using FitnessApp.Common.Paged.Contracts.Output;
 using Newtonsoft.Json;
 
 namespace FitnessApp.ApiGateway.Contracts.Food.Output;
 
+[ExcludeFromCodeCoverage]
 public class UserFoodsContract
 {
     [JsonRequired]

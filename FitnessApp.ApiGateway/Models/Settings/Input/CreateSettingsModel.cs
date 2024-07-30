@@ -1,7 +1,9 @@
-﻿using FitnessApp.ApiGateway.Enums.Settings;
+﻿using System.Diagnostics.CodeAnalysis;
+using FitnessApp.ApiGateway.Enums.Settings;
 
 namespace FitnessApp.ApiGateway.Models.Settings.Input;
 
+[ExcludeFromCodeCoverage]
 public class CreateSettingsModel
 {
     public string UserId { get; set; }

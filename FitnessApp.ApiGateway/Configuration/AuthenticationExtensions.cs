@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
 namespace FitnessApp.ApiGateway.Configuration;
 
+[ExcludeFromCodeCoverage]
 public static class AuthenticationExtensions
 {
     public static IServiceCollection ConfigureAuthentication2(this IServiceCollection services, IConfiguration configuration)

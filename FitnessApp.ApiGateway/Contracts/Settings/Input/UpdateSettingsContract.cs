@@ -1,7 +1,9 @@
-﻿using FitnessApp.ApiGateway.Enums.Settings;
+﻿using System.Diagnostics.CodeAnalysis;
+using FitnessApp.ApiGateway.Enums.Settings;
 
 namespace FitnessApp.ApiGateway.Contracts.Settings.Input;
 
+[ExcludeFromCodeCoverage]
 public class UpdateSettingsContract
 {
     public PrivacyType? CanFollow { get; set; }

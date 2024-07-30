@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using FitnessApp.ApiGateway.Enums.UserProfile;
 
 namespace FitnessApp.ApiGateway.Contracts.UserProfile.Input;
 
+[ExcludeFromCodeCoverage]
 public class UpdateUserProfileContract
 {
     public string Email { get; set; }

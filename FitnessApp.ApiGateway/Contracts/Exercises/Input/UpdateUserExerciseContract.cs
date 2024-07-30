@@ -1,5 +1,8 @@
-﻿namespace FitnessApp.ApiGateway.Contracts.Exercises.Input;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FitnessApp.ApiGateway.Contracts.Exercises.Input;
+
+[ExcludeFromCodeCoverage]
 public class UpdateUserExerciseContract
 {
     public string Id { get; set; }

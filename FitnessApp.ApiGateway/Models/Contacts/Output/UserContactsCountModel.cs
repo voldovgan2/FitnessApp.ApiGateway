@@ -1,5 +1,8 @@
-﻿namespace FitnessApp.ApiGateway.Models.Contacts.Output;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FitnessApp.ApiGateway.Models.Contacts.Output;
+
+[ExcludeFromCodeCoverage]
 public class UserContactsCountModel
 {
     public string UserId { get; set; }

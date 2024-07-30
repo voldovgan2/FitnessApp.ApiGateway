@@ -1,8 +1,10 @@
-﻿using FitnessApp.ApiGateway.Enums.Settings;
+﻿using System.Diagnostics.CodeAnalysis;
+using FitnessApp.ApiGateway.Enums.Settings;
 using Newtonsoft.Json;
 
 namespace FitnessApp.ApiGateway.Contracts.Settings.Output;
 
+[ExcludeFromCodeCoverage]
 public class SettingsContract
 {
     [JsonRequired]

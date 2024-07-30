@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FitnessApp.ApiGateway.Contracts.Exercises.Output;
 
+[ExcludeFromCodeCoverage]
 public class ExerciseItemContract
 {
     public string Id { get; set; }

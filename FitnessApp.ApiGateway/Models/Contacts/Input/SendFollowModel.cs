@@ -1,5 +1,8 @@
-﻿namespace FitnessApp.ApiGateway.Models.Contacts.Input;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FitnessApp.ApiGateway.Models.Contacts.Input;
+
+[ExcludeFromCodeCoverage]
 public class SendFollowModel
 {
     public string UserId { get; set; }

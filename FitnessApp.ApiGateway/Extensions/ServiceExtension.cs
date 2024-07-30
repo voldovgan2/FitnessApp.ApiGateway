@@ -1,4 +1,5 @@
-﻿using FitnessApp.ApiGateway.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using FitnessApp.ApiGateway.Configuration;
 using FitnessApp.ApiGateway.Services.Contacts;
 using FitnessApp.ApiGateway.Services.Exercises;
 using FitnessApp.ApiGateway.Services.Food;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FitnessApp.ApiGateway.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class ServiceExtension
 {
     public static IServiceCollection AddSettingsService(this IServiceCollection services, IConfiguration configuration)

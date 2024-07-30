@@ -1,5 +1,8 @@
-﻿namespace FitnessApp.ApiGateway.Models.Notification;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FitnessApp.ApiGateway.Models.Notification;
+
+[ExcludeFromCodeCoverage]
 public class NotificationTicketModel
 {
     public string Ip { get; set; }

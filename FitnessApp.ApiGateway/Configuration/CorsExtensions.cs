@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FitnessApp.ApiGateway.Configuration;
 
+[ExcludeFromCodeCoverage]
 public static class CorsExtensions
 {
     public static IServiceCollection ConfigureCors(this IServiceCollection services)

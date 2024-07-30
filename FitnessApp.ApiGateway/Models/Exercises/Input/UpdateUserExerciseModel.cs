@@ -1,5 +1,8 @@
-﻿namespace FitnessApp.ApiGateway.Models.Exercises.Input;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FitnessApp.ApiGateway.Models.Exercises.Input;
+
+[ExcludeFromCodeCoverage]
 public class UpdateUserExerciseModel
 {
     public string UserId { get; set; }

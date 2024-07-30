@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using FitnessApp.ApiGateway.Enums.UserProfile;
 using Newtonsoft.Json;
 
 namespace FitnessApp.ApiGateway.Contracts.UserProfile.Output;
 
+[ExcludeFromCodeCoverage]
 public class UsersProfilesShortContract
 {
     [JsonRequired]

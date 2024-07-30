@@ -1,5 +1,8 @@
-﻿namespace FitnessApp.ApiGateway.Contracts.Food.Input;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FitnessApp.ApiGateway.Contracts.Food.Input;
+
+[ExcludeFromCodeCoverage]
 public class UpdateUserFoodContract
 {
     public string Id { get; set; }

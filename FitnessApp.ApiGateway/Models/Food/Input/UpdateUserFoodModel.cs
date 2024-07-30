@@ -1,5 +1,8 @@
-﻿namespace FitnessApp.ApiGateway.Models.Food.Input;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace FitnessApp.ApiGateway.Models.Food.Input;
+
+[ExcludeFromCodeCoverage]
 public class UpdateUserFoodModel
 {
     public string UserId { get; set; }

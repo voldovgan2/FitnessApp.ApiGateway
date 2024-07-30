@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using FitnessApp.ApiGateway.Enums.UserProfile;
 using FitnessApp.ApiGateway.Models.File.Output;
 
 namespace FitnessApp.ApiGateway.Models.UserProfile.Output;
 
+[ExcludeFromCodeCoverage]
 public class UserProfileModel : IFileModel
 {
     required public int FollowersCount { get; set; }

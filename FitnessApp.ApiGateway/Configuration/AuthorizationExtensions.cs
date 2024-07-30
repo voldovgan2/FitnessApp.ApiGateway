@@ -1,9 +1,11 @@
-﻿using FitnessApp.ApiGateway.Authorization;
+﻿using System.Diagnostics.CodeAnalysis;
+using FitnessApp.ApiGateway.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FitnessApp.ApiGateway.Configuration;
 
+[ExcludeFromCodeCoverage]
 public static class AuthorizationExtensions
 {
     public static IServiceCollection ConfigureAuthorization(this IServiceCollection services)

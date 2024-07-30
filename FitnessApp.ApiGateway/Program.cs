@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using FitnessApp.ApiGateway;
 using FitnessApp.ApiGateway.Configuration;
@@ -18,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddDistributedRedisCache(option =>
+builder.Services.AddStackExchangeRedisCache(option =>
 {
     option.Configuration = builder.Configuration["Redis:Configuration"];
 });
@@ -95,4 +96,5 @@ app.UseCors("AllowAll");
 
 app.Run();
 
+[ExcludeFromCodeCoverage]
 public partial class Program { }
