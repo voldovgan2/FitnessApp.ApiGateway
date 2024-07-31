@@ -35,6 +35,10 @@ public class MockInternalClient : IInternalClient
             "Contacts_GetIsFollower" => Task.FromResult(
                 JsonConvert.DeserializeObject<TResponse>(
                     JsonConvert.SerializeObject(true))!),
+            "Contacts_GetIsFollowers" => Task.FromResult(
+                JsonConvert.DeserializeObject<TResponse>(
+                    JsonConvert.SerializeObject(new List<FollowerStatusModel>
+                        { CreateFollowerStatusModel() }))!),
             "Contacts_StartFollow" => Task.FromResult(
                 JsonConvert.DeserializeObject<TResponse>(
                     JsonConvert.SerializeObject("UserId"))!),
@@ -110,6 +114,15 @@ public class MockInternalClient : IInternalClient
         return new ContactModel
         {
             UserId = "UserId"
+        };
+    }
+
+    private FollowerStatusModel CreateFollowerStatusModel()
+    {
+        return new FollowerStatusModel
+        {
+            UserId = "UserId",
+            IsFollower = true,
         };
     }
 

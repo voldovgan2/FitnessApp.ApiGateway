@@ -48,13 +48,14 @@ public class AggregatorService(
         {
             UsersIds = contacts.Select(i => i.UserId)
         });
-        foreach (var item in profiles)
+        var followerStatusModels = await contactsService.IsFollowers(new GetFollowersStatusModel
         {
-            item.CanFollow = !await contactsService.IsFollower(new GetUserContactsModel
-            {
-                UserId = model.UserId,
-                ContactsUserId = item.UserId
-            });
+            ContactsUserId = model.UserId,
+            UserIds = contacts.Select(i => i.UserId)
+        });
+        foreach (var profile in profiles)
+        {
+            profile.CanFollow = !followerStatusModels.Single(followerStatusModel => followerStatusModel.UserId == profile.UserId).IsFollower;
         }
 
         result = profiles.ToPaged(model);

@@ -10,7 +10,8 @@ public interface IContactsService
     Task<bool> CanViewUserContacts(GetUserContactsModel model);
     Task<IEnumerable<ContactModel>> GetUserContacts(GetUserContactsModel model);
     Task<UserContactsCountModel> GetUserContactsCount(string userId);
-    Task<bool> IsFollower(GetUserContactsModel model);
+    Task<bool> IsFollower(GetFollowerStatusModel model);
+    Task<IEnumerable<FollowerStatusModel>> IsFollowers(GetFollowersStatusModel model);
     Task<string> StartFollow(SendFollowModel model);
     Task<string> AcceptFollowRequest(ProcessFollowRequestModel model);
     Task<string> RejectFollowRequest(ProcessFollowRequestModel model);

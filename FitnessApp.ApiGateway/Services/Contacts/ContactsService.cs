@@ -20,6 +20,7 @@ public class ContactsService(
     private const string GET_USER_CONTACTS_METHOD = "GetUserContacts";
     private const string GET_USER_CONTACTS_COUNT_METHOD = "GetUserContactsCount";
     private const string GET_IS_FOLLOWER_METHOD = "GetIsFollower";
+    private const string GET_IS_FOLLOWERS_METHOD = "GetIsFollowers";
     private const string START_FOLLOW_METHOD = "StartFollow";
     private const string ACCEPT_FOLLOW_REQUEST_METHOD = "AcceptFollowRequest";
     private const string REJECT_FOLLOW_REQUEST_METHOD = "RejectFollowRequest";
@@ -35,11 +36,16 @@ public class ContactsService(
             var settings = await settingsService.GetSettings(model.ContactsUserId);
             if (settings != null)
             {
+                var getFollowerStatusModel = new GetFollowerStatusModel
+                {
+                    UserId = model.UserId,
+                    ContactsUserId = model.ContactsUserId,
+                };
                 result =
                     (model.ContactsType == ContactsType.Followers
-                        && ((settings.CanViewFollowers == PrivacyType.All) || (settings.CanViewFollowers == PrivacyType.Followers && await IsFollower(model))))
+                        && ((settings.CanViewFollowers == PrivacyType.All) || (settings.CanViewFollowers == PrivacyType.Followers && await IsFollower(getFollowerStatusModel))))
                     || (model.ContactsType == ContactsType.Followings
-                        && ((settings.CanViewFollowings == PrivacyType.All) || (settings.CanViewFollowings == PrivacyType.Followers && await IsFollower(model))));
+                        && ((settings.CanViewFollowings == PrivacyType.All) || (settings.CanViewFollowings == PrivacyType.Followers && await IsFollower(getFollowerStatusModel))));
             }
         }
 
@@ -85,7 +91,7 @@ public class ContactsService(
         return result;
     }
 
-    public async Task<bool> IsFollower(GetUserContactsModel model)
+    public async Task<bool> IsFollower(GetFollowerStatusModel model)
     {
         var request = new InternalRequest(
             HttpMethod.Get,
@@ -96,6 +102,23 @@ public class ContactsService(
             null,
             model);
         var result = await internalClient.SendInternalRequest<bool>(
+            apiClientSettings.ApiName,
+            apiClientSettings.Scope,
+            request);
+        return result;
+    }
+
+    public async Task<IEnumerable<FollowerStatusModel>> IsFollowers(GetFollowersStatusModel model)
+    {
+        var request = new InternalRequest(
+            HttpMethod.Post,
+            apiClientSettings.Url,
+            apiClientSettings.ApiName,
+            GET_IS_FOLLOWERS_METHOD,
+            null,
+            model,
+            null);
+        var result = await internalClient.SendInternalRequest<IEnumerable<FollowerStatusModel>>(
             apiClientSettings.ApiName,
             apiClientSettings.Scope,
             request);
