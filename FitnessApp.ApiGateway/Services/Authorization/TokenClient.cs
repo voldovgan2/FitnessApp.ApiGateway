@@ -1,6 +1,5 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
-using FitnessApp.ApiGateway.Exceptions;
 using IdentityModel.Client;
 
 namespace FitnessApp.ApiGateway.Services.Authorization;
@@ -14,7 +13,7 @@ public class TokenClient(IHttpClientFactory httpClientFactory) : ITokenClient
         string scope)
     {
         var tokenHttpClient = httpClientFactory.CreateClient("TokenClient");
-        var disco = await tokenHttpClient.GetDiscoveryDocumentAsync(
+        var discoveryDocumentResponse = await tokenHttpClient.GetDiscoveryDocumentAsync(
             new DiscoveryDocumentRequest
             {
                 Address = address,
@@ -23,23 +22,23 @@ public class TokenClient(IHttpClientFactory httpClientFactory) : ITokenClient
                     RequireHttps = false
                 }
             });
-        if (disco.IsError)
+        EnsureProtocolResponseStatusCode(discoveryDocumentResponse);
+        var tokenResponse = await tokenHttpClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
         {
-            throw disco.Exception;
-        }
-        else
-        {
-            var tokenResponse = await tokenHttpClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
-            {
-                Address = disco.TokenEndpoint,
-                ClientId = clientId,
-                ClientSecret = clientSecret,
-                Scope = scope
-            });
-            if (tokenResponse.IsError)
-                throw new InternalUnAuthorizedException(tokenResponse.Error);
+            Address = discoveryDocumentResponse.TokenEndpoint,
+            ClientId = clientId,
+            ClientSecret = clientSecret,
+            Scope = scope
+        });
+        EnsureProtocolResponseStatusCode(tokenResponse);
+        return (tokenResponse.AccessToken, tokenResponse.ExpiresIn);
+    }
 
-            return (tokenResponse.AccessToken, tokenResponse.ExpiresIn);
+    private void EnsureProtocolResponseStatusCode(ProtocolResponse protocolResponse)
+    {
+        if (protocolResponse.IsError)
+        {
+            throw protocolResponse.Exception;
         }
     }
 }

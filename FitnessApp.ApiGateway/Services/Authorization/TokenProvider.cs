@@ -55,10 +55,10 @@ public class TokenProvider : ITokenProvider
             if (string.IsNullOrEmpty(result))
             {
                 var (AccessToken, ExpiresIn) = await _tokenClient.GetAuthenticationToken(
-                _authenticationSettings.Address,
-                _authenticationSettings.ClientId,
-                _authenticationSettings.ClientSecret,
-                scope);
+                    _authenticationSettings.Address,
+                    _authenticationSettings.ClientId,
+                    _authenticationSettings.ClientSecret,
+                    scope);
                 var cacheOptions = new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(ExpiresIn * EXPIRATION_COEFITIENT)

@@ -32,37 +32,32 @@ public class AggregatorService(
 {
     #region Contacts
 
-    public Task<bool> CanViewUserContacts(GetUserContactsModel model)
-    {
-        return contactsService.CanViewUserContacts(model);
-    }
-
     public async Task<PagedDataModel<UserProfileModel>> GetUserContacts(GetUserContactsModel model)
     {
-        PagedDataModel<UserProfileModel> result = null;
-        var contacts = await contactsService.GetUserContacts(model);
-        if (contacts != null)
-        {
-            var getSelectedUsersProfilesModel = new GetSelectedUsersProfilesModel
-            {
-                UsersIds = contacts.Select(i => i.UserId)
-            };
-            var profiles = await userProfileService.GetUsersProfiles(getSelectedUsersProfilesModel);
-            if (profiles != null)
-            {
-                foreach (var item in profiles)
-                {
-                    item.CanFollow = !await contactsService.IsFollower(new GetUserContactsModel
-                    {
-                        UserId = model.UserId,
-                        ContactsUserId = item.UserId
-                    });
-                }
+        PagedDataModel<UserProfileModel> result = Enumerable.Empty<UserProfileModel>().ToPaged(model);
 
-                result = profiles.ToPaged(model);
-            }
+        var canViewUserContacts = await contactsService.CanViewUserContacts(model);
+        if (!canViewUserContacts)
+            return result;
+
+        var contacts = await contactsService.GetUserContacts(model);
+        if (contacts == null)
+            return result;
+
+        var profiles = await userProfileService.GetUsersProfiles(new GetSelectedUsersProfilesModel
+        {
+            UsersIds = contacts.Select(i => i.UserId)
+        });
+        foreach (var item in profiles)
+        {
+            item.CanFollow = !await contactsService.IsFollower(new GetUserContactsModel
+            {
+                UserId = model.UserId,
+                ContactsUserId = item.UserId
+            });
         }
 
+        result = profiles.ToPaged(model);
         return result;
     }
 
@@ -74,14 +69,11 @@ public class AggregatorService(
     public async Task<string> AcceptFollowRequest(ProcessFollowRequestModel model)
     {
         var result = await contactsService.AcceptFollowRequest(model);
-        if (result != null)
+        await notificationService.SendMessage(new FollowRequestConfirmed
         {
-            await notificationService.SendMessage(new FollowRequestConfirmed
-            {
-                UserId = model.UserId,
-                FollowerUserId = model.FollowerUserId
-            });
-        }
+            UserId = model.UserId,
+            FollowerUserId = model.FollowerUserId
+        });
 
         return result;
     }

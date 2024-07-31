@@ -4,4 +4,4 @@ using System.Diagnostics.CodeAnalysis;
 namespace FitnessApp.ApiGateway.Exceptions;
 
 [ExcludeFromCodeCoverage]
-public class InternalUnAuthorizedException(string error) : Exception(error);
+public class InternalUnAuthorizedException(Exception ex) : Exception(null, ex);

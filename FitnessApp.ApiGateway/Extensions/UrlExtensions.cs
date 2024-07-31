@@ -1,27 +1,34 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 
 namespace FitnessApp.ApiGateway.Extensions;
 
-[ExcludeFromCodeCoverage]
 public static class UrlExtensions
 {
     public static string Api(this string url, string apiName)
     {
+        if (string.IsNullOrWhiteSpace(apiName))
+            return url;
+
         string trailingSlash = url.EndsWith('/') ? "" : "/";
         return $"{url}{trailingSlash}api/{apiName}";
     }
 
     public static string Method(this string url, string methodName)
     {
+        if (string.IsNullOrWhiteSpace(methodName))
+            return url;
+
         string trailingSlash = url.EndsWith('/') ? "" : "/";
         return $"{url}{trailingSlash}{methodName}";
     }
 
     public static string Routes(this string url, string[] routes)
     {
+        if (routes.Length == 0)
+            return url;
+
         string trailingSlash = url.EndsWith('/') ? "" : "/";
         return $"{url}{trailingSlash}{string.Join("/", routes)}";
     }
@@ -32,7 +39,7 @@ public static class UrlExtensions
         var propertiesInfo = model.GetType().GetProperties();
         if (propertiesInfo.Length != 0)
         {
-            result.Append('?');
+            StringBuilder queryString = new StringBuilder();
             bool isFirstParameter = true;
             for (int k = 0; k < propertiesInfo.Length; k++)
             {
@@ -41,12 +48,18 @@ public static class UrlExtensions
                 {
                     if (!isFirstParameter)
                     {
-                        result.Append('&');
+                        queryString.Append('&');
                     }
 
                     isFirstParameter = false;
-                    result.Append(propertiesInfo[k].Name + "=" + propertyValue.ToString());
+                    queryString.Append(propertiesInfo[k].Name + "=" + propertyValue.ToString());
                 }
+            }
+
+            if (queryString.Length > 0)
+            {
+                result.Append('?');
+                result.Append(queryString.ToString());
             }
         }
 

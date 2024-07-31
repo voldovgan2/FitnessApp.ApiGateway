@@ -16,8 +16,6 @@ namespace FitnessApp.ApiGateway.Services.Aggregator;
 public interface IAggregatorService
 {
     #region Contacts
-
-    Task<bool> CanViewUserContacts(GetUserContactsModel model);
     Task<PagedDataModel<UserProfileModel>> GetUserContacts(GetUserContactsModel model);
     Task<string> StartFollow(SendFollowModel model);
     Task<string> AcceptFollowRequest(ProcessFollowRequestModel model);

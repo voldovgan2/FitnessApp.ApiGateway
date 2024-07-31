@@ -57,7 +57,7 @@ public class NotificationService(IServiceBus serviceBus, IDistributedCache distr
     private static NotificationTicketModel ExtractNotificationTicketModelFromString(string data)
     {
         var fields = data.Split('_', StringSplitOptions.RemoveEmptyEntries);
-        if (fields.Length != 2) throw new InternalUnAuthorizedException("Invalid ticket");
+        if (fields.Length != 2) throw new InternalUnAuthorizedException(new Exception("Invalid ticket"));
         return new NotificationTicketModel
         {
             Ip = fields[0],

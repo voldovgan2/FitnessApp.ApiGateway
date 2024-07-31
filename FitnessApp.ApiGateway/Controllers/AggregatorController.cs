@@ -10,7 +10,6 @@ using FitnessApp.ApiGateway.Contracts.Settings.Input;
 using FitnessApp.ApiGateway.Contracts.Settings.Output;
 using FitnessApp.ApiGateway.Contracts.UserProfile.Input;
 using FitnessApp.ApiGateway.Contracts.UserProfile.Output;
-using FitnessApp.ApiGateway.Exceptions;
 using FitnessApp.ApiGateway.Models.Contacts.Input;
 using FitnessApp.ApiGateway.Models.Exercises.Input;
 using FitnessApp.ApiGateway.Models.Food.Input;
@@ -87,17 +86,8 @@ public class AggregatorController(
         var model = mapper.Map<GetUserContactsModel>(contract);
         model.UserId = userId;
         model.ContactsUserId ??= userId;
-
-        var canViewUserContacts = await aggregatorService.CanViewUserContacts(model);
-        if (canViewUserContacts)
-        {
-            var response = await aggregatorService.GetUserContacts(model);
-            return mapper.Map<PagedDataContract<UsersProfilesShortContract>>(response);
-        }
-        else
-        {
-            throw new ForbidenException("Access denied to this resource");
-        }
+        var response = await aggregatorService.GetUserContacts(model);
+        return mapper.Map<PagedDataContract<UsersProfilesShortContract>>(response);
     }
 
     [HttpPost("StartFollow")]
