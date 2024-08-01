@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using FitnessApp.ApiGateway.Contracts.Contacts.Input;
 using FitnessApp.ApiGateway.Contracts.Exercises.Input;
@@ -10,8 +9,8 @@ using FitnessApp.ApiGateway.Contracts.Settings.Input;
 using FitnessApp.ApiGateway.Contracts.Settings.Output;
 using FitnessApp.ApiGateway.Contracts.UserProfile.Input;
 using FitnessApp.ApiGateway.Contracts.UserProfile.Output;
+using FitnessApp.Common.IntegrationTests;
 using FitnessApp.Common.Paged.Contracts.Output;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Newtonsoft.Json;
 
 namespace FitnessApp.ApiGateway.IntegrationTests;
@@ -22,12 +21,7 @@ public class AggregatorControllerTest : IClassFixture<TestWebApplicationFactory>
 
     public AggregatorControllerTest(TestWebApplicationFactory factory)
     {
-        _httpClient = factory
-            .CreateClient(new WebApplicationFactoryClientOptions
-            {
-                AllowAutoRedirect = false,
-            });
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme: MockConstants.Scheme);
+        _httpClient = factory.CreateHttpClient();
     }
 
     #region Contacts

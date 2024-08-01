@@ -1,4 +1,5 @@
 ﻿using FitnessApp.ApiGateway.Services.Authorization;
+using FitnessApp.Common.IntegrationTests;
 
 namespace FitnessApp.ApiGateway.IntegrationTests;
 

@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
+using FitnessApp.Common.IntegrationTests;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,23 +11,10 @@ public class MockAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder)
-    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+    : MockAuthenticationHandlerBase(options, logger, encoder)
 {
-    protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+    protected override List<Claim> GetClaimsByRequest(string path)
     {
-        var identity = new ClaimsIdentity(GetClaimsByRequest(Request.Path), MockConstants.SvTest);
-        var principal = new ClaimsPrincipal(identity);
-        var ticket = new AuthenticationTicket(principal, MockConstants.Scheme);
-        var result = AuthenticateResult.Success(ticket);
-        return Task.FromResult(result);
-    }
-
-    private Claim[] GetClaimsByRequest(string path)
-    {
-        ArgumentNullException.ThrowIfNull(path);
-        return [
-            new Claim(ClaimTypes.NameIdentifier, MockConstants.SvTest),
-            new Claim("Permission", "Помножувати")
-        ];
+        return [new Claim("Permission", "Помножувати")];
     }
 }
