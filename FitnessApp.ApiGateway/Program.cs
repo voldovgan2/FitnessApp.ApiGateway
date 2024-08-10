@@ -73,6 +73,8 @@ builder.Services.ConfigureCors();
 
 builder.Services.ConfigureSwagger(Assembly.GetExecutingAssembly().GetName().Name);
 
+builder.Services.AddHealthChecks();
+
 builder.ConfigureLogging();
 
 var app = builder.Build();
@@ -92,6 +94,7 @@ app.UseMiddleware<CorrelationIdHeaderMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 app.UseCors("AllowAll");
 
 app.Run();
