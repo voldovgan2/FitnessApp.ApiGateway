@@ -1,4 +1,6 @@
 ﻿using IdentityModel.Client;
+using Newtonsoft.Json;
+using SvTest;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods.Token;
 
@@ -46,5 +48,19 @@ async Task<TokenResponse> RequestAuthenticationToken(string scope)
         });
 
         return tokenResponse;
+    }
+}
+
+namespace SvTest
+{
+    public class TestCollectionModel
+    {
+        public string UserId { get; set; } = "";
+        public Dictionary<string, List<TestCollectionItemModel>> Collection { get; set; } = new Dictionary<string, List<TestCollectionItemModel>>();
+    }
+
+    public class TestCollectionItemModel
+    {
+        public string Id { get; set; } = "";
     }
 }

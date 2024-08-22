@@ -12,7 +12,7 @@ public class InternalClient(IHttpClientFactory httpClientFactory, ITokenProvider
 {
     public async Task<TResponse> SendInternalRequest<TResponse>(string apiName, string scope, InternalRequest internalRequest)
     {
-        var request = CreateRequest(apiName, scope, internalRequest).GetAwaiter().GetResult();
+        var request = await CreateRequest(apiName, scope, internalRequest);
         var internalHttpClient = httpClientFactory.CreateClient("InternalClient");
         var response = await internalHttpClient.SendAsync(request);
         return await ProcessResponse<TResponse>(response);
